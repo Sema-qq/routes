@@ -1,9 +1,32 @@
-version: '2'
+version: '3.8'
+
 services:
   php:
-    image: yiisoftware/yii2-php:7.4-apache
+    image: yiisoftware/yii2-php:8.2-apache
+    container_name: yii2-app
     volumes:
-      - ~/.composer-docker/cache:/root/.composer/cache:delegated
-      - ./:/app:delegated
+      - ./:/app
     ports:
-      - '8000:80'
+      - "8080:80"      # приложение будет на http://localhost:8080
+      - "9003:9003"    # порт для Xdebug 3.x (по умолчанию)
+    environment:
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: client_host=host.docker.internal
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: pgsql
+    restart: always
+    environment:
+      POSTGRES_DB: csu
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
