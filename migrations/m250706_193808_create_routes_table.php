@@ -11,12 +11,12 @@ class m250706_193808_create_routes_table extends Migration
     {
         $this->createTable('routes', [
             'id' => $this->primaryKey(),
-            'minibus_id' => $this->integer()->notNull(),
+            'car_id' => $this->integer()->notNull(),
             'type' => $this->string(16)->notNull(), // 'direct'/'reverse'
             'created_at' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP'),
             'updated_at' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP')
         ]);
-        $this->addForeignKey('fk-routes-minibus', 'routes', 'minibus_id', 'minibuses', 'id', 'CASCADE');
+        $this->addForeignKey('fk-routes-cars', 'routes', 'car_id', 'cars', 'id', 'CASCADE');
     }
 
     public function safeDown(): void
