@@ -4,11 +4,11 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\repository\CarSearch $model */
+/** @var app\models\repository\CarBrandSearch $model */
 /** @var yii\widgets\ActiveForm $form */
 ?>
 
-<div class="car-search">
+<div class="car-brand-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
@@ -17,21 +17,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'id') ?>
 
-    <?= $form->field($model, 'fare') ?>
+    <?= $form->field($model, 'name') ?>
 
-    <?= $form->field($model, 'production_year') ?>
-
-    <?= $form->field($model, 'owner_id') ?>
-
-    <?= $form->field($model, 'driver_id') ?>
-
-    <?php // echo $form->field($model, 'created_at') ?>
-
-    <?php // echo $form->field($model, 'updated_at') ?>
-
-    <?php // echo $form->field($model, 'brand_id') ?>
-
-    <?php // echo $form->field($model, 'model') ?>
+    <?= $form->field($model, 'country') ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

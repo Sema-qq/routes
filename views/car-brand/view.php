@@ -4,14 +4,14 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /** @var yii\web\View $this */
-/** @var app\models\repository\User $model */
+/** @var app\models\repository\CarBrand $model */
 
-$this->title = $model->full_name;
-$this->params['breadcrumbs'][] = ['label' => 'Владельцы/водители', 'url' => ['index']];
+$this->title = $model->name;
+$this->params['breadcrumbs'][] = ['label' => 'Производители', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
-<div class="user-view">
+<div class="car-brand-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
+                'confirm' => 'Вы уверены, что хотите удалить производителя?',
                 'method' => 'post',
             ],
         ]) ?>
@@ -30,10 +30,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'full_name',
-            'license_date',
-            'created_at',
-            'updated_at',
+            'name',
+            'country',
         ],
     ]) ?>
 

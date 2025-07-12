@@ -8,20 +8,20 @@ use Yii;
  * This is the model class for table "cars".
  *
  * @property int $id
- * @property string|null $brand
  * @property int|null $fare
- * @property string|null $manufacturer
- * @property string|null $country
  * @property int|null $production_year
  * @property int $owner_id
  * @property int $driver_id
  * @property string|null $created_at
  * @property string|null $updated_at
+ * @property int $brand_id
+ * @property string $model
  *
- * @property Users $driver
- * @property Users $owner
- * @property Routes[] $routes
- * @property Schedules[] $schedules
+ * @property CarBrand $brand
+ * @property User $driver
+ * @property User $owner
+ * @property Route[] $routes
+ * @property Schedule[] $schedules
  */
 class Car extends \yii\db\ActiveRecord
 {
@@ -39,14 +39,16 @@ class Car extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['brand', 'fare', 'manufacturer', 'country', 'production_year'], 'default', 'value' => null],
-            [['fare', 'production_year', 'owner_id', 'driver_id'], 'default', 'value' => null],
-            [['fare', 'production_year', 'owner_id', 'driver_id'], 'integer'],
-            [['owner_id', 'driver_id'], 'required'],
+            [['fare', 'production_year'], 'default', 'value' => null],
+            [['fare', 'production_year', 'owner_id', 'driver_id', 'brand_id'], 'default', 'value' => null],
+            [['fare', 'production_year', 'owner_id', 'driver_id', 'brand_id'], 'integer'],
+            [['owner_id', 'driver_id', 'brand_id', 'model'], 'required'],
             [['created_at', 'updated_at'], 'safe'],
-            [['brand', 'manufacturer', 'country'], 'string', 'max' => 255],
-            [['owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['owner_id' => 'id']],
-            [['driver_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['driver_id' => 'id']],
+            [['model'], 'string', 'max' => 255],
+            [['brand_id'], 'exist', 'skipOnError' => true, 'targetClass' => CarBrand::class, 'targetAttribute' => ['brand_id' => 'id']],
+            [['owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['owner_id' => 'id']],
+            [['driver_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['driver_id' => 'id']],
+            [['driver_id'], 'validateDriverExperience'],
         ];
     }
 
@@ -57,16 +59,25 @@ class Car extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'brand' => 'Brand',
-            'fare' => 'Fare',
-            'manufacturer' => 'Manufacturer',
-            'country' => 'Country',
-            'production_year' => 'Production Year',
-            'owner_id' => 'Owner ID',
-            'driver_id' => 'Driver ID',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'fare' => 'Стоимость проезда',
+            'production_year' => 'Год производства',
+            'owner_id' => 'Владелец',
+            'driver_id' => 'Водитель',
+            'created_at' => 'Дата создания',
+            'updated_at' => 'Дата обновления',
+            'brand_id' => 'Производитель',
+            'model' => 'Марка',
         ];
+    }
+
+    /**
+     * Gets query for [[Brand]].
+     *
+     * @return \yii\db\ActiveQuery|CarBrandQuery
+     */
+    public function getBrand()
+    {
+        return $this->hasOne(CarBrand::class, ['id' => 'brand_id']);
     }
 
     /**
@@ -92,7 +103,7 @@ class Car extends \yii\db\ActiveRecord
     /**
      * Gets query for [[Routes]].
      *
-     * @return \yii\db\ActiveQuery|RoutesQuery
+     * @return \yii\db\ActiveQuery|RouteQuery
      */
     public function getRoutes()
     {
@@ -102,7 +113,7 @@ class Car extends \yii\db\ActiveRecord
     /**
      * Gets query for [[Schedules]].
      *
-     * @return \yii\db\ActiveQuery|SchedulesQuery
+     * @return \yii\db\ActiveQuery|ScheduleQuery
      */
     public function getSchedules()
     {
@@ -118,4 +129,20 @@ class Car extends \yii\db\ActiveRecord
         return new CarQuery(get_called_class());
     }
 
+    /**
+     * Проверяет, что водитель имеет стаж более 3 лет.
+     */
+    public function validateDriverExperience($attribute, $params)
+    {
+        $driver = User::findOne($this->driver_id);
+        if (!$driver || !$driver->license_date) {
+            $this->addError($attribute, 'Не удалось определить дату получения прав водителя.');
+            return;
+        }
+        $threeYearsAgo = strtotime('-3 years');
+        $licenseDate = strtotime($driver->license_date);
+        if ($licenseDate > $threeYearsAgo) {
+            $this->addError($attribute, 'Водитель должен иметь стаж не менее 3 лет.');
+        }
+    }
 }

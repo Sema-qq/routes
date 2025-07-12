@@ -46,11 +46,23 @@ class User extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'full_name' => 'Full Name',
-            'license_date' => 'License Date',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'full_name' => 'ФИО',
+            'license_date' => 'Дата получения В.У.',
+            'created_at' => 'Дата создания',
+            'updated_at' => 'Дата обновления',
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            if ($insert) {
+                $this->created_at = date('Y-m-d H:i:s');
+            }
+            $this->updated_at = date('Y-m-d H:i:s');
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -82,4 +94,16 @@ class User extends \yii\db\ActiveRecord
         return new UserQuery(get_called_class());
     }
 
+    /**
+     * Возвращает водителей со стажем больше 3 лет.
+     * @return User[]
+     */
+    public static function getDrivers(): array
+    {
+        $threeYearsAgo = date('Y-m-d', strtotime('-3 years'));
+        return self::find()
+            ->where(['<=', 'license_date', $threeYearsAgo])
+            ->andWhere(['IS NOT', 'license_date', null])
+            ->all();
+    }
 }

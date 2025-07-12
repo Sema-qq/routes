@@ -4,17 +4,17 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\repository\User $model */
+/** @var app\models\repository\CarBrand $model */
 /** @var yii\widgets\ActiveForm $form */
 ?>
 
-<div class="user-form">
+<div class="car-brand-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'full_name')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'license_date')->input('date') ?>
+    <?= $form->field($model, 'country')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>

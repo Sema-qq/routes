@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\repository\CarSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Cars';
+$this->title = 'Маршрутки';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="car-index">
@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Car', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -30,15 +30,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'id',
-            'brand',
             'fare',
-            'manufacturer',
-            'country',
-            //'production_year',
-            //'owner_id',
-            //'driver_id',
-            //'created_at',
-            //'updated_at',
+            'owner_id',
+            'driver_id',
+            'production_year',
+            'model',
+            'brand_id',
+            'created_at',
+            'updated_at',
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, Car $model, $key, $index, $column) {

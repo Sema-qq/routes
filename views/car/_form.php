@@ -1,37 +1,43 @@
 <?php
 
+use app\models\repository\CarBrand;
+use app\models\repository\User;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
 /** @var app\models\repository\Car $model */
 /** @var yii\widgets\ActiveForm $form */
+
+// Владельцы
+$userItems = ArrayHelper::map(User::find()->all(), 'id', 'full_name');
+
+// Водители
+$driverItems = ArrayHelper::map(User::getDrivers(), 'id', 'full_name');
+
+// Производители
+$brandItems = ArrayHelper::map(CarBrand::find()->all(), 'id', 'name');
 ?>
 
 <div class="car-form">
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'brand')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'fare')->input('number') ?>
 
-    <?= $form->field($model, 'fare')->textInput() ?>
+    <?= $form->field($model, 'production_year')->input('date') ?>
 
-    <?= $form->field($model, 'manufacturer')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'owner_id')->dropDownList($userItems, ['prompt' => 'Выберите владельца']) ?>
 
-    <?= $form->field($model, 'country')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'driver_id')->dropDownList($driverItems, ['prompt' => 'Выберите водителя']) ?>
 
-    <?= $form->field($model, 'production_year')->textInput() ?>
+    <?= $form->field($model, 'brand_id')->dropDownList($brandItems, ['prompt' => 'Выберите производителя']) ?>
 
-    <?= $form->field($model, 'owner_id')->textInput() ?>
-
-    <?= $form->field($model, 'driver_id')->textInput() ?>
-
-    <?= $form->field($model, 'created_at')->textInput() ?>
-
-    <?= $form->field($model, 'updated_at')->textInput() ?>
+    <?= $form->field($model, 'model')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

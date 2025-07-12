@@ -21,9 +21,9 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'license_date') ?>
 
-    <?= $form->field($model, 'created_at') ?>
+    <?= $form->field($model, 'created_at')->textInput(['type' => 'date']) ?>
 
-    <?= $form->field($model, 'updated_at') ?>
+    <?= $form->field($model, 'updated_at')->textInput(['type' => 'date']) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>

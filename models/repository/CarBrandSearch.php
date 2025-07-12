@@ -4,12 +4,12 @@ namespace app\models\repository;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\repository\Car;
+use app\models\repository\CarBrand;
 
 /**
- * CarSearch represents the model behind the search form of `app\models\repository\Car`.
+ * CarBrandSearch represents the model behind the search form of `app\models\repository\CarBrand`.
  */
-class CarSearch extends Car
+class CarBrandSearch extends CarBrand
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,8 @@ class CarSearch extends Car
     public function rules(): array
     {
         return [
-            [['id', 'fare', 'production_year', 'owner_id', 'driver_id', 'brand_id'], 'integer'],
-            [['created_at', 'updated_at', 'model'], 'safe'],
+            [['id'], 'integer'],
+            [['name', 'country'], 'safe'],
         ];
     }
 
@@ -41,7 +41,7 @@ class CarSearch extends Car
      */
     public function search($params, $formName = null): ActiveDataProvider
     {
-        $query = Car::find();
+        $query = CarBrand::find();
 
         // add conditions that should always apply here
 
@@ -60,16 +60,10 @@ class CarSearch extends Car
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'fare' => $this->fare,
-            'production_year' => $this->production_year,
-            'owner_id' => $this->owner_id,
-            'driver_id' => $this->driver_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'brand_id' => $this->brand_id,
         ]);
 
-        $query->andFilterWhere(['ilike', 'model', $this->model]);
+        $query->andFilterWhere(['ilike', 'name', $this->name])
+            ->andFilterWhere(['ilike', 'country', $this->country]);
 
         return $dataProvider;
     }
