@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\repository\RouteSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Routes';
+$this->title = 'Маршруты';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="route-index">
@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Route', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Добавить маршрут', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -31,7 +31,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'id',
             'car_id',
-            'type',
+            [
+                'attribute' => 'type',
+                'value' => function($model) {
+                    return Route::getTypeLabels()[$model->type] ?? $model->type;
+                },
+                'filter' => Route::getTypeLabels(),
+            ],
             'created_at',
             'updated_at',
             [

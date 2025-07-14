@@ -69,6 +69,17 @@ class Car extends \yii\db\ActiveRecord
             'model' => 'Марка',
         ];
     }
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            if ($insert) {
+                $this->created_at = date('Y-m-d H:i:s');
+            }
+            $this->updated_at = date('Y-m-d H:i:s');
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Gets query for [[Brand]].
@@ -144,5 +155,28 @@ class Car extends \yii\db\ActiveRecord
         if ($licenseDate > $threeYearsAgo) {
             $this->addError($attribute, 'Водитель должен иметь стаж не менее 3 лет.');
         }
+    }
+
+    public function publicName(): string
+    {
+        // например: "№1 Sprinter Mercedes 2017 г.в."
+        return "№{$this->id} {$this->model} {$this->brand->name} {$this->production_year} г.в.";
+    }
+
+    /**
+     * Возвращает массив доступных маршруток
+     * @param array $carIds
+     * @return Car[]
+     */
+    public static function getAvailableForTransport(array $carIds = []): array
+    {
+        $minYear = date('Y') - 10;
+        $query = self::find()->where(['>=', 'production_year', $minYear]);
+
+        if (!empty($carIds)) {
+            $query->andWhere(['id' => $carIds]);
+        }
+
+        return $query->orderBy('id')->all();
     }
 }

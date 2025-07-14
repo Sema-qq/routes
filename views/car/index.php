@@ -1,6 +1,9 @@
 <?php
 
 use app\models\repository\Car;
+use app\models\repository\CarBrand;
+use app\models\repository\User;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -12,6 +15,29 @@ use yii\grid\GridView;
 
 $this->title = 'Маршрутки';
 $this->params['breadcrumbs'][] = $this->title;
+
+// Владельцы
+$ownerItems = ArrayHelper::map(
+    User::find()
+        ->innerJoin('cars', 'cars.owner_id = users.id')
+        ->distinct()
+        ->all(),
+    'id',
+    'full_name'
+);
+
+// Водители
+$driverItems = ArrayHelper::map(
+    User::find()
+        ->innerJoin('cars', 'cars.driver_id = users.id')
+        ->distinct()
+        ->all(),
+    'id',
+    'full_name'
+);
+
+// Производители
+$brandItems = ArrayHelper::map(CarBrand::find()->all(), 'id', 'name');
 ?>
 <div class="car-index">
 
@@ -31,11 +57,29 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'id',
             'fare',
-            'owner_id',
-            'driver_id',
+            [
+                'attribute' => 'owner_id',
+                'value' => function ($model) {
+                    return $model->owner->full_name ?? null;
+                },
+                'filter' => $ownerItems, // выпадающий список
+            ],
+            [
+                'attribute' => 'driver_id',
+                'value' => function ($model) {
+                    return $model->driver->full_name ?? null;
+                },
+                'filter' => $driverItems,
+            ],
             'production_year',
             'model',
-            'brand_id',
+            [
+                'attribute' => 'brand_id',
+                'value' => function ($model) {
+                    return $model->brand->name ?? null;
+                },
+                'filter' => $brandItems,
+            ],
             'created_at',
             'updated_at',
             [

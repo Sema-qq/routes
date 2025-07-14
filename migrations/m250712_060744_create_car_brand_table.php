@@ -15,7 +15,7 @@ class m250712_060744_create_car_brand_table extends Migration
         $this->createTable('{{%car_brand}}', [
             'id' => $this->primaryKey(),
             'name' => $this->string()->notNull()->unique()->comment('Бренд (марка) автомобиля'),
-            'country' => $this->string()->comment('Страна-производитель'),
+            'country' => $this->string()->notNull()->comment('Страна-производитель'),
         ]);
     }
 

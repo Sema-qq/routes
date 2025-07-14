@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\repository\Stop $model */
 
-$this->title = 'Update Stop: ' . $model->name;
+$this->title = 'Изменение остановки: ' . $model->name;
 $this->params['breadcrumbs'][] = ['label' => 'Stops', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Update';

@@ -19,6 +19,15 @@ use Yii;
  */
 class Route extends \yii\db\ActiveRecord
 {
+    public const TYPE_DIRECT = 'direct';
+    public const TYPE_REVERSE = 'reverse';
+
+    /**
+     * Массив id остановок по порядку (виртуальное поле для формы)
+     * @var int[]
+     */
+    public array $stop_ids = [];
+
     /**
      * {@inheritdoc}
      */
@@ -37,8 +46,13 @@ class Route extends \yii\db\ActiveRecord
             [['car_id'], 'default', 'value' => null],
             [['car_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['type'], 'string', 'max' => 16],
+            [['type'], 'in', 'range' => [self::TYPE_DIRECT, self::TYPE_REVERSE]],
+            [['car_id', 'type'], 'unique', 'targetAttribute' => ['car_id', 'type'], 'message' => 'Для этой маршрутки уже существует маршрут такого типа.'],
             [['car_id'], 'exist', 'skipOnError' => true, 'targetClass' => Car::class, 'targetAttribute' => ['car_id' => 'id']],
+            // поле для сохранения связей
+            ['stop_ids', 'required'],
+            ['stop_ids', 'each', 'rule' => ['integer']],
+            ['stop_ids', 'validateStopsCount'],
         ];
     }
 
@@ -49,11 +63,31 @@ class Route extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'car_id' => 'Car ID',
-            'type' => 'Type',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
+            'car_id' => 'Маршрутка',
+            'type' => 'Тип маршрута',
+            'created_at' => 'Дата создания',
+            'updated_at' => 'Дата обновления',
         ];
+    }
+
+    public static function getTypeLabels(): array
+    {
+        return [
+            self::TYPE_DIRECT => 'Прямой',
+            self::TYPE_REVERSE => 'Обратный',
+        ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if (parent::beforeSave($insert)) {
+            if ($insert) {
+                $this->created_at = date('Y-m-d H:i:s');
+            }
+            $this->updated_at = date('Y-m-d H:i:s');
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -95,4 +129,11 @@ class Route extends \yii\db\ActiveRecord
         return new RouteQuery(get_called_class());
     }
 
+    public function validateStopsCount($attribute)
+    {
+        $count = count(array_filter($this->$attribute));
+        if ($count !== 10) {
+            $this->addError($attribute, 'У маршрута должно быть 10 остановок.');
+        }
+    }
 }

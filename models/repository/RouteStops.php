@@ -46,9 +46,9 @@ class RouteStops extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'route_id' => 'Route ID',
-            'stop_id' => 'Stop ID',
-            'stop_number' => 'Stop Number',
+            'route_id' => 'Номер маршрута',
+            'stop_id' => 'Остановка',
+            'stop_number' => 'Номер остановки',
         ];
     }
 

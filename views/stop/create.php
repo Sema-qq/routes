@@ -5,8 +5,8 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var app\models\repository\Stop $model */
 
-$this->title = 'Create Stop';
-$this->params['breadcrumbs'][] = ['label' => 'Stops', 'url' => ['index']];
+$this->title = 'Добавление остановки';
+$this->params['breadcrumbs'][] = ['label' => 'Остановки', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="stop-create">

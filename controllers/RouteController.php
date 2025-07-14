@@ -4,9 +4,12 @@ namespace app\controllers;
 
 use app\models\repository\Route;
 use app\models\repository\RouteSearch;
+use app\models\repository\RouteStops;
+use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * RouteController implements the CRUD actions for Route model.
@@ -53,7 +56,7 @@ class RouteController extends Controller
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id)
+    public function actionView($id): string
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -63,14 +66,26 @@ class RouteController extends Controller
     /**
      * Creates a new Route model.
      * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
+     * @return string|Response
      */
     public function actionCreate()
     {
         $model = new Route();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
+            if ($model->load($this->request->post()) && $model->validate() && $model->save()) {
+                // Сохраняем 10 остановок
+                $stopIds = $model->stop_ids;
+                foreach ($stopIds as $order => $stopId) {
+                    if ($stopId) {
+                        $routeStop = new RouteStops();
+                        $routeStop->route_id = $model->id;
+                        $routeStop->stop_id = $stopId;
+                        $routeStop->stop_number = $order; // $order от 1 до 10
+                        $routeStop->save();
+                    }
+                }
+                Yii::$app->session->setFlash('success', 'Маршрут успешно создан!');
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         } else {
@@ -82,18 +97,45 @@ class RouteController extends Controller
         ]);
     }
 
+
     /**
      * Updates an existing Route model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
-     * @return string|\yii\web\Response
+     * @return string|Response
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+        // При открытии формы заполни stop_ids существующими остановками
+        if (empty($model->stop_ids)) {
+            $model->stop_ids = \yii\helpers\ArrayHelper::map(
+                $model->routeStops, // relation, должны быть в порядке stop_number
+                'stop_number',
+                'stop_id'
+            );
+            // если не гарантируется порядок в relation — сортируй:
+            ksort($model->stop_ids);
+        }
+
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->validate() && $model->save()) {
+            // Удалить старые остановки
+            RouteStops::deleteAll(['route_id' => $model->id]);
+
+            // Сохранить новые остановки
+            $stopIds = $model->stop_ids;
+            foreach ($stopIds as $order => $stopId) {
+                if ($stopId) {
+                    $routeStop = new RouteStops();
+                    $routeStop->route_id = $model->id;
+                    $routeStop->stop_id = $stopId;
+                    $routeStop->stop_number = $order;
+                    $routeStop->save();
+                }
+            }
+            Yii::$app->session->setFlash('success', 'Маршрут обновлён!');
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -106,10 +148,10 @@ class RouteController extends Controller
      * Deletes an existing Route model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
-     * @return \yii\web\Response
+     * @return Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id): \yii\web\Response
+    public function actionDelete($id): Response
     {
         $this->findModel($id)->delete();
 

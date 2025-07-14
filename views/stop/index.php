@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var app\models\repository\StopSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Stops';
+$this->title = 'Остановки';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="stop-index">
@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Stop', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Добавить остановку', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>

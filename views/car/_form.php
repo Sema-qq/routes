@@ -26,7 +26,11 @@ $brandItems = ArrayHelper::map(CarBrand::find()->all(), 'id', 'name');
 
     <?= $form->field($model, 'fare')->input('number') ?>
 
-    <?= $form->field($model, 'production_year')->input('date') ?>
+    <?= $form->field($model, 'production_year')->input('number', [
+        'min' => 1900,
+        'max' => date('Y'),
+        'placeholder' => 'Год, например, 2022'
+    ]) ?>
 
     <?= $form->field($model, 'owner_id')->dropDownList($userItems, ['prompt' => 'Выберите владельца']) ?>
 
