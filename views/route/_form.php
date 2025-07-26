@@ -11,18 +11,9 @@ use yii\widgets\ActiveForm;
 /** @var app\models\repository\Route $model */
 /** @var yii\widgets\ActiveForm $form */
 
-$carsWithRoutes = Route::find()
-    ->select(['car_id', 'cnt' => 'COUNT(*)'])
-    ->groupBy('car_id')
-    ->having(['<', 'COUNT(*)', 2])
-    ->asArray()
-    ->all();
-
-$carIds = array_column($carsWithRoutes, 'car_id');
-
 // Все доступные маршрутки
 $carItems = ArrayHelper::map(
-    Car::getAvailableForTransport($carIds),
+    Car::find()->availableYear()->withLessThanTwoRoutes()->all(),
     'id',
     /**
      * @return string

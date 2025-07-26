@@ -50,7 +50,6 @@ $this->title = 'Расписание маршруток';
             ['label' => 'Производители', 'url' => ['/car-brand/index']],
             ['label' => 'Остановки', 'url' => ['/stop/index']],
             ['label' => 'Маршруты', 'url' => ['/route/index']],
-            ['label' => 'Route-Stops', 'url' => ['/route-stops/index']],
             ['label' => 'Расписания', 'url' => ['/schedule/index']],
         ]
     ]);

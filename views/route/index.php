@@ -1,6 +1,8 @@
 <?php
 
+use app\models\repository\Car;
 use app\models\repository\Route;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
@@ -9,6 +11,19 @@ use yii\grid\GridView;
 /** @var yii\web\View $this */
 /** @var app\models\repository\RouteSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
+
+// Все маршрутки, у которых есть хоть один маршрут
+$carItems = ArrayHelper::map(
+    Car::find()->availableYear()->withRoutes()->all(),
+    'id',
+    /**
+     * @return string
+     * @var Car $car
+     */
+    function(Car $car) {
+        return $car->publicName();
+    }
+);
 
 $this->title = 'Маршруты';
 $this->params['breadcrumbs'][] = $this->title;
@@ -30,7 +45,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'id',
-            'car_id',
+            [
+                'attribute' => 'car_id',
+                'value' => function($model) {
+                    return $model->car->publicName();
+                },
+                'filter' => $carItems,
+            ],
             [
                 'attribute' => 'type',
                 'value' => function($model) {

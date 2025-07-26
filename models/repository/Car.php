@@ -170,8 +170,7 @@ class Car extends \yii\db\ActiveRecord
      */
     public static function getAvailableForTransport(array $carIds = []): array
     {
-        $minYear = date('Y') - 10;
-        $query = self::find()->where(['>=', 'production_year', $minYear]);
+        $query = self::find()->availableYear();
 
         if (!empty($carIds)) {
             $query->andWhere(['id' => $carIds]);
