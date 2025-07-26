@@ -61,11 +61,10 @@ class RouteSearch extends Route
         $query->andFilterWhere([
             'id' => $this->id,
             'car_id' => $this->car_id,
+            'type' => $this->type,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
-
-        $query->andFilterWhere(['ilike', 'type', $this->type]);
 
         return $dataProvider;
     }
