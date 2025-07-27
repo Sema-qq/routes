@@ -18,139 +18,156 @@ use yii\grid\GridView;
 // Все маршрутки, у которых есть хоть один маршрут
 $carItems = ArrayHelper::map(
     Car::withRoutes(),
-    'id',
+    "id",
     /**
      * @return string
      * @var Car $car
      */
-    function(Car $car) {
+    function (Car $car) {
         return $car->publicName();
-    }
+    },
 );
 
 $stopItems = ArrayHelper::map(
     Stop::getUsedInRoutes(),
-    'id',
+    "id",
     /**
      * @return string
      * @var Stop $stop
      */
-    function(Stop $stop) {
+    function (Stop $stop) {
         return $stop->name;
-    }
+    },
 );
 
-$this->title = 'Расписания';
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = "Расписания";
+$this->params["breadcrumbs"][] = $this->title;
 ?>
 <div class="schedule-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
-        <?= Html::a('Сбросить фильтры', [Yii::$app->controller->id . '/index'], ['class' => 'btn btn-outline-secondary']) ?>
+        <?= Html::a(
+            '<i class="fas fa-magic"></i> Создать через мастер',
+            ["wizard"],
+            ["class" => "btn btn-primary"],
+        ) ?>
+        <?= Html::a("Добавить", ["create"], ["class" => "btn btn-success"]) ?>
+        <?= Html::a(
+            "Сбросить фильтры",
+            [Yii::$app->controller->id . "/index"],
+            ["class" => "btn btn-outline-secondary"],
+        ) ?>
     </p>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php
+// echo $this->render('_search', ['model' => $searchModel]);
+?>
 
     <?= GridView::widget([
-        'dataProvider' => $dataProvider,
-        'filterModel' => $searchModel,
-        'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+        "dataProvider" => $dataProvider,
+        "filterModel" => $searchModel,
+        "columns" => [
+            ["class" => "yii\grid\SerialColumn"],
 
-            'id',
+            "id",
             [
-                'attribute' => 'date',
-                'format' => 'date',
-                'filter' => Html::input(
-                    'date',
-                    $searchModel->formName() . '[date]',
+                "attribute" => "date",
+                "format" => "date",
+                "filter" => Html::input(
+                    "date",
+                    $searchModel->formName() . "[date]",
                     $searchModel->date,
-                    ['class' => 'form-control']
+                    ["class" => "form-control"],
                 ),
             ],
             [
-                'attribute' => 'car_id',
-                'value' => function($model) {
+                "attribute" => "car_id",
+                "value" => function ($model) {
                     return $model->car->publicName();
                 },
-                'filter' => $carItems,
+                "filter" => $carItems,
             ],
             [
-                'attribute' => 'route_id',
-                'value' => function($model) {
+                "attribute" => "route_id",
+                "value" => function ($model) {
                     return Route::getTypeLabels()[$model->route->type];
                 },
-                'filter' => Html::activeDropDownList(
+                "filter" => Html::activeDropDownList(
                     $searchModel,
-                    'route_type',
+                    "route_type",
                     Route::getTypeLabels(),
-                    ['prompt' => '', 'class' => 'form-control']
+                    ["prompt" => "", "class" => "form-control"],
                 ),
-                'encodeLabel' => false,
+                "encodeLabel" => false,
             ],
             [
-                'attribute' => 'stop_id',
-                'value' => function($model) {
+                "attribute" => "stop_id",
+                "value" => function ($model) {
                     return $model->stop->name;
                 },
-                'filter' => $stopItems,
+                "filter" => $stopItems,
             ],
             [
-                'attribute' => 'stop_number',
-                'filter' => Html::activeDropDownList(
+                "attribute" => "stop_number",
+                "filter" => Html::activeDropDownList(
                     $searchModel,
-                    'stop_number',
+                    "stop_number",
                     RouteStops::getStopNumberList(),
-                    ['prompt' => '', 'class' => 'form-control']
+                    ["prompt" => "", "class" => "form-control"],
                 ),
             ],
             [
-                'attribute' => 'planned_time',
-                'format' => 'raw',
-                'label' => "Планируемое<br>время<br>прибытия",
-                'encodeLabel' => false,
-                'filter' => Html::input(
-                    'time',
-                    $searchModel->formName() . '[planned_time]',
+                "attribute" => "planned_time",
+                "format" => "raw",
+                "label" => "Планируемое<br>время<br>прибытия",
+                "encodeLabel" => false,
+                "filter" => Html::input(
+                    "time",
+                    $searchModel->formName() . "[planned_time]",
                     $searchModel->planned_time,
-                    ['class' => 'form-control']
+                    ["class" => "form-control"],
                 ),
             ],
             [
-                'attribute' => 'actual_time',
-                'format' => 'raw',
-                'label' => "Фактическое<br>время<br>прибытия",
-                'encodeLabel' => false,
-                'filter' => Html::input(
-                    'time',
-                    $searchModel->formName() . '[actual_time]',
+                "attribute" => "actual_time",
+                "format" => "raw",
+                "label" => "Фактическое<br>время<br>прибытия",
+                "encodeLabel" => false,
+                "filter" => Html::input(
+                    "time",
+                    $searchModel->formName() . "[actual_time]",
                     $searchModel->actual_time,
-                    ['class' => 'form-control']
+                    ["class" => "form-control"],
                 ),
             ],
             [
-                'attribute' => 'boarded_count',
-                'format' => 'raw',
-                'label' => "Количество<br>вошедших",
-                'encodeLabel' => false,
-                'filter' => Html::input(
-                    'number',
-                    $searchModel->formName() . '[boarded_count]',
+                "attribute" => "boarded_count",
+                "format" => "raw",
+                "label" => "Количество<br>вошедших",
+                "encodeLabel" => false,
+                "filter" => Html::input(
+                    "number",
+                    $searchModel->formName() . "[boarded_count]",
                     $searchModel->boarded_count,
-                    ['class' => 'form-control', 'min' => 0]
+                    ["class" => "form-control", "min" => 0],
                 ),
             ],
             [
-                'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Schedule $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'id' => $model->id]);
-                }
+                "class" => ActionColumn::className(),
+                "urlCreator" => function (
+                    $action,
+                    Schedule $model,
+                    $key,
+                    $index,
+                    $column,
+                ) {
+                    return Url::toRoute([$action, "id" => $model->id]);
+                },
             ],
         ],
-    ]); ?>
+    ]) ?>
 
 
 </div>
