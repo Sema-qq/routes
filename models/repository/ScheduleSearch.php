@@ -7,10 +7,12 @@ use yii\data\ActiveDataProvider;
 use app\models\repository\Schedule;
 
 /**
- * ScheduleStopsSearch represents the model behind the search form of `app\models\repository\Schedule`.
+ * ScheduleSearch represents the model behind the search form of `app\models\repository\Schedule`.
  */
-class ScheduleStopsSearch extends Schedule
+class ScheduleSearch extends Schedule
 {
+    public $route_type;
+
     /**
      * {@inheritdoc}
      */
@@ -19,6 +21,7 @@ class ScheduleStopsSearch extends Schedule
         return [
             [['id', 'car_id', 'route_id', 'stop_id', 'stop_number', 'boarded_count'], 'integer'],
             [['date', 'planned_time', 'actual_time'], 'safe'],
+            [['route_type'], 'in', 'range' => [Route::TYPE_DIRECT, Route::TYPE_REVERSE]],
         ];
     }
 
@@ -69,6 +72,10 @@ class ScheduleStopsSearch extends Schedule
             'actual_time' => $this->actual_time,
             'boarded_count' => $this->boarded_count,
         ]);
+
+        if ($this->route_type) {
+            $query->joinWith('route')->andWhere(['routes.type' => $this->route_type]);
+        }
 
         return $dataProvider;
     }

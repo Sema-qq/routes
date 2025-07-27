@@ -3,7 +3,7 @@
 namespace app\controllers;
 
 use app\models\repository\Schedule;
-use app\models\repository\ScheduleStopsSearch;
+use app\models\repository\ScheduleSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -38,7 +38,7 @@ class ScheduleController extends Controller
      */
     public function actionIndex(): string
     {
-        $searchModel = new ScheduleStopsSearch();
+        $searchModel = new ScheduleSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [

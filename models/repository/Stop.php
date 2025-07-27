@@ -74,4 +74,12 @@ class Stop extends \yii\db\ActiveRecord
         return new StopQuery(get_called_class());
     }
 
+    /**
+     * Возвращает все используемые в маршрутах остановки
+     * @return Stop[]
+     */
+    public static function getUsedInRoutes(): array
+    {
+        return self::find()->usedInRoutes()->all();
+    }
 }

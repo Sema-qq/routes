@@ -31,4 +31,13 @@ class StopQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    /**
+     * Scope: только остановки, которые есть в route_stops (уникальные)
+     * @return StopQuery
+     */
+    public function usedInRoutes(): StopQuery
+    {
+        return $this->where(['id' => RouteStops::find()->select('stop_id')->distinct()]);
+    }
 }

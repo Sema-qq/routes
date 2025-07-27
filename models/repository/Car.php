@@ -164,18 +164,11 @@ class Car extends \yii\db\ActiveRecord
     }
 
     /**
-     * Возвращает массив доступных маршруток
-     * @param array $carIds
+     * Возвращает все маршрутки имеющие маршруты
      * @return Car[]
      */
-    public static function getAvailableForTransport(array $carIds = []): array
+    public static function withRoutes(): array
     {
-        $query = self::find()->availableYear();
-
-        if (!empty($carIds)) {
-            $query->andWhere(['id' => $carIds]);
-        }
-
-        return $query->orderBy('id')->all();
+        return self::find()->withRoutes()->all();
     }
 }

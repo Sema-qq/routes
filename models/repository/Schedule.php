@@ -37,6 +37,10 @@ class Schedule extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
+            [['date'], 'date', 'format' => 'php:Y-m-d'],
+            [['planned_time', 'actual_time'], 'time', 'format' => 'php:H:i'],
+            [['stop_number'], 'integer', 'min' => RouteStops::STOP_NUMBER_MIN, 'max' => RouteStops::STOP_NUMBER_MAX],
+
             [['planned_time', 'actual_time'], 'default', 'value' => null],
             [['boarded_count'], 'default', 'value' => 0],
             [['date', 'car_id', 'route_id', 'stop_id', 'stop_number'], 'required'],
@@ -55,15 +59,15 @@ class Schedule extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => 'ID',
-            'date' => 'Date',
-            'car_id' => 'Car ID',
-            'route_id' => 'Route ID',
-            'stop_id' => 'Stop ID',
-            'stop_number' => 'Stop Number',
-            'planned_time' => 'Planned Time',
-            'actual_time' => 'Actual Time',
-            'boarded_count' => 'Boarded Count',
+            'id' => '№',
+            'date' => 'Дата',
+            'car_id' => 'Маршрутка',
+            'route_id' => 'Маршрут',
+            'stop_id' => 'Остановка',
+            'stop_number' => '№ остановки',
+            'planned_time' => 'Планируемое время прибытия',
+            'actual_time' => 'Фактическое время прибытия',
+            'boarded_count' => 'Количество вошедших',
         ];
     }
 

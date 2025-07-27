@@ -14,7 +14,7 @@ use yii\grid\GridView;
 
 // Все маршрутки, у которых есть хоть один маршрут
 $carItems = ArrayHelper::map(
-    Car::find()->availableYear()->withRoutes()->all(),
+    Car::withRoutes(),
     'id',
     /**
      * @return string

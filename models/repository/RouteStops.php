@@ -17,6 +17,17 @@ use Yii;
  */
 class RouteStops extends \yii\db\ActiveRecord
 {
+    public const STOP_NUMBER_MIN = 1;
+    public const STOP_NUMBER_MAX = 10;
+
+    public static function getStopNumberList(): array
+    {
+        return array_combine(
+            range(self::STOP_NUMBER_MIN, self::STOP_NUMBER_MAX),
+            range(self::STOP_NUMBER_MIN, self::STOP_NUMBER_MAX)
+        );
+    }
+
     /**
      * {@inheritdoc}
      */
