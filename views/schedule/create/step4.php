@@ -1,19 +1,22 @@
 <?php
 
+use app\models\repository\Schedule;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\ScheduleWizardForm $model */
+/** @var app\models\ScheduleCreateForm $model */
 
 $this->title = "Создание расписания - Шаг 4: Ввод данных";
-$this->registerCssFile("@web/css/wizard.css");
+$this->registerCssFile("@web/css/create.css");
 $this->params["breadcrumbs"][] = ["label" => "Расписание", "url" => ["index"]];
 $this->params["breadcrumbs"][] = [
     "label" => "Создание расписания",
-    "url" => ["wizard"],
+    "url" => ["create"],
 ];
 $this->params["breadcrumbs"][] = "Шаг 4";
+
+$selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
 ?>
 
 <div class="schedule-wizard-step4">
@@ -51,13 +54,9 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                         <nav aria-label="Навигация по шагам">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item">
-                                    <?= Html::a(
-                                        "Дата: " .
-                                            Yii::$app->formatter->asDate(
-                                                $model->date,
-                                            ),
-                                        ["wizard"],
-                                    ) ?>
+                                    <?= Html::a("Дата: " . $selectDate, [
+                                        "create",
+                                    ]) ?>
                                 </li>
                                 <li class="breadcrumb-item">
                                     <?php
@@ -70,7 +69,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                                     ?>
                                     <?= Html::a(
                                         "Маршрутка: " . Html::encode($carName),
-                                        ["wizard-go-to-step", "step" => 1],
+                                        ["create-go-to-step", "step" => 1],
                                     ) ?>
                                 </li>
                                 <li class="breadcrumb-item">
@@ -84,7 +83,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                                     ?>
                                     <?= Html::a(
                                         "Маршрут: " . Html::encode($routeName),
-                                        ["wizard-go-to-step", "step" => 2],
+                                        ["create-go-to-step", "step" => 2],
                                     ) ?>
                                 </li>
                                 <li class="breadcrumb-item">
@@ -100,7 +99,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                                     ?>
                                     <?= Html::a(
                                         "Остановка: " . Html::encode($stopName),
-                                        ["wizard-go-to-step", "step" => 3],
+                                        ["create-go-to-step", "step" => 3],
                                     ) ?>
                                 </li>
                                 <li class="breadcrumb-item active" aria-current="page">Данные</li>
@@ -109,7 +108,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                     </div>
 
                     <?php $form = ActiveForm::begin([
-                        "id" => "wizard-step4-form",
+                        "id" => "create-step4-form",
                         "options" => ["class" => "form-horizontal"],
                         "fieldConfig" => [
                             "template" =>
@@ -126,7 +125,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                                 <i class="fas fa-check-circle"></i>
                                 <strong>Финальный шаг!</strong><br>
                                 Введите данные о времени и количестве пассажиров для создания расписания.
-                                Все поля являются необязательными, но рекомендуется заполнить хотя бы планируемое время.
+                                Все поля являются обязательными.
                             </div>
                         </div>
                     </div>
@@ -137,6 +136,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                             "class" => "form-control",
                             "step" => "60", // шаг в секундах (1 минута)
                             "placeholder" => "ЧЧ:ММ",
+                            "required" => true,
                         ])
                         ->hint("Время в формате ЧЧ:ММ (например, 14:30)") ?>
 
@@ -146,6 +146,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                             "class" => "form-control",
                             "step" => "60",
                             "placeholder" => "ЧЧ:ММ",
+                            "required" => true,
                         ])
                         ->hint(
                             "Фактическое время прибытия (заполняется позже)",
@@ -158,6 +159,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                             "min" => 0,
                             "max" => 999,
                             "placeholder" => "0",
+                            "required" => true,
                         ])
                         ->hint(
                             "Количество пассажиров, которые вошли на этой остановке",
@@ -206,14 +208,12 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                                         "class" => "btn btn-success btn-lg",
                                         "name" => "finish",
                                         "id" => "finish-btn",
-                                        "data-confirm" =>
-                                            "Вы уверены, что хотите создать расписание с указанными данными?",
                                     ],
                                 ) ?>
 
                                 <?= Html::a(
                                     '<i class="fas fa-times"></i> Отменить',
-                                    ["wizard-cancel"],
+                                    ["create-cancel"],
                                     [
                                         "class" => "btn btn-outline-danger",
                                         "data-confirm" =>
@@ -259,7 +259,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
 
                     <div class="alert alert-info small mt-3">
                         <i class="fas fa-lightbulb"></i>
-                        Все поля необязательные, но планируемое время рекомендуется заполнить.
+                        Все поля обязательные.
                     </div>
                 </div>
             </div>
@@ -275,10 +275,7 @@ $this->params["breadcrumbs"][] = "Шаг 4";
                     <dl class="small">
                         <dt>Дата:</dt>
                         <dd class="text-primary font-weight-bold">
-                            <?= Yii::$app->formatter->asDate(
-                                $model->date,
-                                "long",
-                            ) ?>
+                            <?= $selectDate ?>
                         </dd>
 
                         <dt>Маршрутка:</dt>
@@ -372,39 +369,6 @@ $this->params["breadcrumbs"][] = "Шаг 4";
         } else {
             $(this).removeClass('is-invalid');
             $(this).siblings('.invalid-feedback').remove();
-        }
-    });
-
-    // Валидация количества пассажиров
-    $('#scheduleWizardform-boarded_count').on('input', function() {
-        var value = parseInt($(this).val());
-        if (isNaN(value) || value < 0) {
-            $(this).val(0);
-        }
-        if (value > 999) {
-            $(this).val(999);
-        }
-    });
-
-    // Подтверждение создания
-    $('#finish-btn').on('click', function(e) {
-        var plannedTime = $('#scheduleWizardform-planned_time').val();
-        if (!plannedTime) {
-            if (!confirm('Планируемое время не указано. Продолжить создание расписания?')) {
-                e.preventDefault();
-                return false;
-            }
-        }
-    });
-
-    // Установка текущего времени по умолчанию для планируемого времени
-    $(document).ready(function() {
-        var plannedTimeField = $('#scheduleWizardform-planned_time');
-        if (!plannedTimeField.val()) {
-            var now = new Date();
-            var hours = String(now.getHours()).padStart(2, '0');
-            var minutes = String(now.getMinutes()).padStart(2, '0');
-            plannedTimeField.val(hours + ':' + minutes);
         }
     });
 ");

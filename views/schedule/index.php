@@ -49,11 +49,10 @@ $this->params["breadcrumbs"][] = $this->title;
 
     <p>
         <?= Html::a(
-            '<i class="fas fa-magic"></i> Создать через мастер',
-            ["wizard"],
-            ["class" => "btn btn-primary"],
+            '<i class="fas fa-magic"></i> Добавить',
+            ["create"],
+            ["class" => "btn btn-success"],
         ) ?>
-        <?= Html::a("Добавить", ["create"], ["class" => "btn btn-success"]) ?>
         <?= Html::a(
             "Сбросить фильтры",
             [Yii::$app->controller->id . "/index"],
@@ -62,8 +61,8 @@ $this->params["breadcrumbs"][] = $this->title;
     </p>
 
     <?php
-// echo $this->render('_search', ['model' => $searchModel]);
-?>
+    // echo $this->render('_search', ['model' => $searchModel]);
+    ?>
 
     <?= GridView::widget([
         "dataProvider" => $dataProvider,
@@ -74,7 +73,7 @@ $this->params["breadcrumbs"][] = $this->title;
             "id",
             [
                 "attribute" => "date",
-                "format" => "date",
+                "format" => ["date", Schedule::DATE_FORMAT],
                 "filter" => Html::input(
                     "date",
                     $searchModel->formName() . "[date]",
@@ -120,7 +119,7 @@ $this->params["breadcrumbs"][] = $this->title;
             ],
             [
                 "attribute" => "planned_time",
-                "format" => "raw",
+                "format" => ["time", Schedule::TIME_FORMAT],
                 "label" => "Планируемое<br>время<br>прибытия",
                 "encodeLabel" => false,
                 "filter" => Html::input(
@@ -132,7 +131,7 @@ $this->params["breadcrumbs"][] = $this->title;
             ],
             [
                 "attribute" => "actual_time",
-                "format" => "raw",
+                "format" => ["time", Schedule::TIME_FORMAT],
                 "label" => "Фактическое<br>время<br>прибытия",
                 "encodeLabel" => false,
                 "filter" => Html::input(
@@ -161,7 +160,7 @@ $this->params["breadcrumbs"][] = $this->title;
                     Schedule $model,
                     $key,
                     $index,
-                    $column,
+                    $column
                 ) {
                     return Url::toRoute([$action, "id" => $model->id]);
                 },

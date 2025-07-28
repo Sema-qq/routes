@@ -1,21 +1,22 @@
 <?php
 
+use app\models\repository\Schedule;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\ScheduleWizardForm $model */
+/** @var app\models\ScheduleCreateForm $model */
 
 $this->title = "Создание расписания - Шаг 3: Выбор остановки";
-$this->registerCssFile("@web/css/wizard.css");
+$this->registerCssFile("@web/css/create.css");
 $this->params["breadcrumbs"][] = ["label" => "Расписание", "url" => ["index"]];
 $this->params["breadcrumbs"][] = [
     "label" => "Создание расписания",
-    "url" => ["wizard"],
+    "url" => ["create"],
 ];
 $this->params["breadcrumbs"][] = "Шаг 3";
 
-$selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
+$selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
 ?>
 
 <div class="schedule-wizard-step3">
@@ -51,10 +52,9 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                         <nav aria-label="Навигация по шагам">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item">
-                                    <?= Html::a(
-                                        "Дата: " . $selectDate,
-                                        ["wizard"],
-                                    ) ?>
+                                    <?= Html::a("Дата: " . $selectDate, [
+                                        "create",
+                                    ]) ?>
                                 </li>
                                 <li class="breadcrumb-item">
                                     <?php
@@ -67,7 +67,7 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                                     ?>
                                     <?= Html::a(
                                         "Маршрутка: " . Html::encode($carName),
-                                        ["wizard-go-to-step", "step" => 1],
+                                        ["create-go-to-step", "step" => 1],
                                     ) ?>
                                 </li>
                                 <li class="breadcrumb-item">
@@ -81,7 +81,7 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                                     ?>
                                     <?= Html::a(
                                         "Маршрут: " . Html::encode($routeName),
-                                        ["wizard-go-to-step", "step" => 2],
+                                        ["create-go-to-step", "step" => 2],
                                     ) ?>
                                 </li>
                                 <li class="breadcrumb-item active" aria-current="page">Остановка</li>
@@ -89,8 +89,19 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                         </nav>
                     </div>
 
-                    <?php $form = ActiveForm::begin([
-                        "id" => "wizard-step3-form",
+                    <?php
+                    // Предзаполняем route_stop_key из существующих данных
+                    if (
+                        empty($model->route_stop_key) &&
+                        !empty($model->stop_id) &&
+                        !empty($model->stop_number)
+                    ) {
+                        $model->route_stop_key =
+                            $model->stop_id . "_" . $model->stop_number;
+                    }
+
+                    $form = ActiveForm::begin([
+                        "id" => "create-step3-form",
                         "options" => ["class" => "form-horizontal"],
                         "fieldConfig" => [
                             "template" =>
@@ -99,7 +110,8 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                                 "class" => "col-sm-4 control-label",
                             ],
                         ],
-                    ]); ?>
+                    ]);
+                    ?>
 
                     <div class="form-group row">
                         <div class="col-sm-8 offset-sm-4">
@@ -127,13 +139,13 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                                 <div class="btn-group">
                                     <?= Html::a(
                                         '<i class="fas fa-arrow-left"></i> Выбрать другой маршрут',
-                                        ["wizard-go-to-step", "step" => 2],
+                                        ["create-go-to-step", "step" => 2],
                                         ["class" => "btn btn-primary"],
                                     ) ?>
 
                                     <?= Html::a(
                                         '<i class="fas fa-times"></i> Отменить',
-                                        ["wizard-cancel"],
+                                        ["create-cancel"],
                                         ["class" => "btn btn-secondary"],
                                     ) ?>
                                 </div>
@@ -144,17 +156,17 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
 
                         else: ?>
                         <?php echo $form
-                                ->field($model, "route_stop_key", [
-                                    "template" =>
-                                        '{label}<div class="col-sm-8">{input}{error}<div class="form-text">Формат: № остановки — название остановки</div></div>',
-                                ])
-                                ->dropDownList($availableStops, [
-                                    "prompt" => "Выберите остановку...",
-                                    "class" => "form-control",
-                                    "id" => "stop-select",
-                                    "onchange" => "updateStopData(this.value)",
-                                ])
-                                ->label("Остановка и номер"); ?>
+                            ->field($model, "route_stop_key", [
+                                "template" =>
+                                    '{label}<div class="col-sm-8">{input}{error}<div class="form-text">Формат: № остановки — название остановки</div></div>',
+                            ])
+                            ->dropDownList($availableStops, [
+                                "prompt" => "Выберите остановку...",
+                                "class" => "form-control",
+                                "id" => "stop-select",
+                                "onchange" => "updateStopData(this.value)",
+                            ])
+                            ->label("Остановка и номер"); ?>
 
                         <!-- Скрытые поля для сохранения данных -->
                         <?= $form
@@ -167,6 +179,14 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                             ->label(false) ?>
                         <?= $form
                             ->field($model, "route_id")
+                            ->hiddenInput()
+                            ->label(false) ?>
+                        <?= $form
+                            ->field($model, "stop_id")
+                            ->hiddenInput()
+                            ->label(false) ?>
+                        <?= $form
+                            ->field($model, "stop_number")
                             ->hiddenInput()
                             ->label(false) ?>
                         <?= $form
@@ -199,7 +219,7 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
 
                                     <?= Html::a(
                                         '<i class="fas fa-times"></i> Отменить',
-                                        ["wizard-cancel"],
+                                        ["create-cancel"],
                                         [
                                             "class" => "btn btn-outline-danger",
                                             "data-confirm" =>
@@ -338,11 +358,17 @@ $this->registerJs(
 
     function updateStopData(selectedKey) {
         if (selectedKey && stopData[selectedKey]) {
+            // Заполняем скрытые поля
+            $('#schedulewizardform-stop_id').val(stopData[selectedKey].stop_id);
+            $('#schedulewizardform-stop_number').val(stopData[selectedKey].stop_number);
+
             // Активируем кнопку 'Далее'
             $('#next-btn').prop('disabled', false).removeClass('btn-secondary').addClass('btn-primary');
         } else {
-            $('#stop-number-input').val('');
-            $('#selected-stop-info').hide();
+            // Очищаем скрытые поля
+            $('#schedulewizardform-stop_id').val('');
+            $('#schedulewizardform-stop_number').val('');
+
             $('#next-btn').prop('disabled', true).removeClass('btn-primary').addClass('btn-secondary');
         }
     }
@@ -358,7 +384,18 @@ $this->registerJs(
         if (selected) {
             updateStopData(selected);
         } else {
-            $('#next-btn').prop('disabled', true).removeClass('btn-primary').addClass('btn-secondary');
+            // Проверяем, возможно данные уже есть в скрытых полях
+            var stopId = $('#schedulewizardform-stop_id').val();
+            var stopNumber = $('#schedulewizardform-stop_number').val();
+
+            if (stopId && stopNumber) {
+                // Формируем ключ и выбираем соответствующий элемент в dropdown
+                var key = stopId + '_' + stopNumber;
+                $('#stop-select').val(key);
+                updateStopData(key);
+            } else {
+                $('#next-btn').prop('disabled', true).removeClass('btn-primary').addClass('btn-secondary');
+            }
         }
     });
 ",

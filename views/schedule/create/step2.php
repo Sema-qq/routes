@@ -1,21 +1,22 @@
 <?php
 
+use app\models\repository\Schedule;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\ScheduleWizardForm $model */
+/** @var app\models\ScheduleCreateForm $model */
 
 $this->title = "Создание расписания - Шаг 2: Выбор маршрута";
-$this->registerCssFile("@web/css/wizard.css");
+$this->registerCssFile("@web/css/create.css");
 $this->params["breadcrumbs"][] = ["label" => "Расписание", "url" => ["index"]];
 $this->params["breadcrumbs"][] = [
     "label" => "Создание расписания",
-    "url" => ["wizard"],
+    "url" => ["create"],
 ];
 $this->params["breadcrumbs"][] = "Шаг 2";
 
-$selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
+$selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
 ?>
 
 <div class="schedule-wizard-step2">
@@ -49,10 +50,9 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                         <nav aria-label="Навигация по шагам">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item">
-                                    <?= Html::a(
-                                        "Дата: " . $selectDate,
-                                        ["wizard"],
-                                    ) ?>
+                                    <?= Html::a("Дата: " . $selectDate, [
+                                        "create",
+                                    ]) ?>
                                 </li>
                                 <li class="breadcrumb-item">
                                     <?php
@@ -65,7 +65,7 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                                     ?>
                                     <?= Html::a(
                                         "Маршрутка: " . Html::encode($carName),
-                                        ["wizard-go-to-step", "step" => 1],
+                                        ["create-go-to-step", "step" => 1],
                                     ) ?>
                                 </li>
                                 <li class="breadcrumb-item active" aria-current="page">Маршрут</li>
@@ -74,7 +74,7 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                     </div>
 
                     <?php $form = ActiveForm::begin([
-                        "id" => "wizard-step2-form",
+                        "id" => "create-step2-form",
                         "options" => ["class" => "form-horizontal"],
                         "fieldConfig" => [
                             "template" =>
@@ -110,13 +110,13 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                                 <div class="btn-group">
                                     <?= Html::a(
                                         '<i class="fas fa-arrow-left"></i> Выбрать другую маршрутку',
-                                        ["wizard-go-to-step", "step" => 1],
+                                        ["create-go-to-step", "step" => 1],
                                         ["class" => "btn btn-primary"],
                                     ) ?>
 
                                     <?= Html::a(
                                         '<i class="fas fa-times"></i> Отменить',
-                                        ["wizard-cancel"],
+                                        ["create-cancel"],
                                         ["class" => "btn btn-secondary"],
                                     ) ?>
                                 </div>
@@ -129,6 +129,7 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
                                 "prompt" => "Выберите маршрут...",
                                 "class" => "form-control",
                                 "id" => "route-select",
+                                "required" => true,
                             ]) ?>
 
                         <!-- Скрытые поля для сохранения данных -->
@@ -170,7 +171,7 @@ $selectDate = Yii::$app->formatter->asDate($model->date, 'php:d.m.Y')
 
                                     <?= Html::a(
                                         '<i class="fas fa-times"></i> Отменить',
-                                        ["wizard-cancel"],
+                                        ["create-cancel"],
                                         [
                                             "class" => "btn btn-outline-danger",
                                             "data-confirm" =>

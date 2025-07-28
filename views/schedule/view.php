@@ -1,5 +1,7 @@
 <?php
 
+use app\models\repository\Route;
+use app\models\repository\Schedule;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -30,13 +32,43 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'date',
-            'car_id',
-            'route_id',
-            'stop_id',
+            [
+                'attribute' => 'date',
+                'value' => function ($model) {
+                    return Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
+                }
+            ],
+            [
+                'attribute' => 'car_id',
+                'value' => function ($model) {
+                    return $model->car->publicName();
+                }
+            ],
+            [
+                'attribute' => 'route_id',
+                'value' => function ($model) {
+                    return Route::getTypeLabels()[$model->route->type];
+                }
+            ],
+            [
+                'attribute' => 'stop_id',
+                'value' => function ($model) {
+                    return $model->stop->name;
+                }
+            ],
             'stop_number',
-            'planned_time',
-            'actual_time',
+            [
+                'attribute' => 'planned_time',
+                'value' => function ($model) {
+                    return Yii::$app->formatter->asDate($model->planned_time, Schedule::TIME_FORMAT);
+                }
+            ],
+            [
+                'attribute' => 'actual_time',
+                'value' => function ($model) {
+                    return Yii::$app->formatter->asDate($model->actual_time, Schedule::TIME_FORMAT);
+                }
+            ],
             'boarded_count',
         ],
     ]) ?>

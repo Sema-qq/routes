@@ -4,11 +4,12 @@ namespace app\controllers;
 
 use app\models\repository\Schedule;
 use app\models\repository\ScheduleSearch;
-use app\models\ScheduleWizardForm;
+use app\models\ScheduleCreateForm;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use Yii;
+use yii\web\Response;
 
 /**
  * ScheduleController implements the CRUD actions for Schedule model.
@@ -52,7 +53,7 @@ class ScheduleController extends Controller
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id): string
+    public function actionView(int $id): string
     {
         return $this->render("view", [
             "model" => $this->findModel($id),
@@ -60,34 +61,12 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Creates a new Schedule model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return string|\yii\web\Response
+     * Мастер создания расписания - начальный экран с выбором даты
+     * @return string|Response
      */
     public function actionCreate()
     {
-        $model = new Schedule();
-
-        if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(["view", "id" => $model->id]);
-            }
-        } else {
-            $model->loadDefaultValues();
-        }
-
-        return $this->render("create", [
-            "model" => $model,
-        ]);
-    }
-
-    /**
-     * Мастер создания расписания - начальный экран с выбором даты
-     * @return string|\yii\web\Response
-     */
-    public function actionWizard()
-    {
-        $model = new ScheduleWizardForm();
+        $model = new ScheduleCreateForm();
         $model->loadFromSession();
 
         if ($this->request->isPost) {
@@ -96,14 +75,14 @@ class ScheduleController extends Controller
             if (!empty($model->date)) {
                 $model->current_step = 1;
                 $model->saveToSession();
-                return $this->redirect(["wizard-step", "step" => 1]);
+                return $this->redirect(["create-step", "step" => 1]);
             }
         } else {
             // Устанавливаем дату по умолчанию на сегодня
             $model->date = date("Y-m-d");
         }
 
-        return $this->render("wizard/start", [
+        return $this->render("create/start", [
             "model" => $model,
         ]);
     }
@@ -111,18 +90,18 @@ class ScheduleController extends Controller
     /**
      * Шаги мастера создания расписания
      * @param int $step Номер шага (1-4)
-     * @return string|\yii\web\Response
+     * @return string|Response
      */
-    public function actionWizardStep($step)
+    public function actionCreateStep($step)
     {
         $step = (int) $step;
         if ($step < 1 || $step > 4) {
-            return $this->redirect(["wizard"]);
+            return $this->redirect(["create"]);
         }
 
-        $model = new ScheduleWizardForm();
+        $model = new ScheduleCreateForm();
         if (!$model->loadFromSession()) {
-            return $this->redirect(["wizard"]);
+            return $this->redirect(["create"]);
         }
 
         // Проверяем, можно ли перейти к этому шагу
@@ -130,10 +109,10 @@ class ScheduleController extends Controller
             // Перенаправляем на первый доступный шаг
             for ($i = 1; $i <= 4; $i++) {
                 if ($model->canGoToStep($i)) {
-                    return $this->redirect(["wizard-step", "step" => $i]);
+                    return $this->redirect(["create-step", "step" => $i]);
                 }
             }
-            return $this->redirect(["wizard"]);
+            return $this->redirect(["create"]);
         }
 
         $model->current_step = $step;
@@ -145,22 +124,22 @@ class ScheduleController extends Controller
             $isValid = $this->validateStep($model, $step);
 
             if ($isValid) {
-                $model->saveToSession();
-
                 // Обработка кнопок навигации
                 if (isset($_POST["next"])) {
                     if ($step < 4) {
                         $model->nextStep();
+                        $model->saveToSession();
                         return $this->redirect([
-                            "wizard-step",
+                            "create-step",
                             "step" => $step + 1,
                         ]);
                     }
                 } elseif (isset($_POST["previous"])) {
                     if ($step > 1) {
                         $model->previousStep();
+                        $model->saveToSession();
                         return $this->redirect([
-                            "wizard-step",
+                            "create-step",
                             "step" => $step - 1,
                         ]);
                     }
@@ -183,7 +162,7 @@ class ScheduleController extends Controller
             }
         }
 
-        return $this->render("wizard/step{$step}", [
+        return $this->render("create/step{$step}", [
             "model" => $model,
         ]);
     }
@@ -191,35 +170,35 @@ class ScheduleController extends Controller
     /**
      * Возврат к определенному шагу мастера
      * @param int $step
-     * @return \yii\web\Response
+     * @return Response
      */
-    public function actionWizardGoToStep($step)
+    public function actionCreateGoToStep(int $step): Response
     {
         $step = (int) $step;
         if ($step < 1 || $step > 4) {
-            return $this->redirect(["wizard"]);
+            return $this->redirect(["create"]);
         }
 
-        $model = new ScheduleWizardForm();
+        $model = new ScheduleCreateForm();
         if (!$model->loadFromSession()) {
-            return $this->redirect(["wizard"]);
+            return $this->redirect(["create"]);
         }
 
         if ($model->canGoToStep($step)) {
             $model->setStep($step);
-            return $this->redirect(["wizard-step", "step" => $step]);
+            return $this->redirect(["create-step", "step" => $step]);
         }
 
-        return $this->redirect(["wizard-step", "step" => $model->current_step]);
+        return $this->redirect(["create-step", "step" => $model->current_step]);
     }
 
     /**
      * Отмена мастера и очистка сессии
-     * @return \yii\web\Response
+     * @return Response
      */
-    public function actionWizardCancel()
+    public function actionCreateCancel(): Response
     {
-        $model = new ScheduleWizardForm();
+        $model = new ScheduleCreateForm();
         $model->clearSession();
         Yii::$app->session->setFlash("info", "Создание расписания отменено.");
         return $this->redirect(["index"]);
@@ -227,11 +206,11 @@ class ScheduleController extends Controller
 
     /**
      * Валидация конкретного шага
-     * @param ScheduleWizardForm $model
+     * @param ScheduleCreateForm $model
      * @param int $step
      * @return bool
      */
-    private function validateStep($model, $step)
+    private function validateStep(ScheduleCreateForm $model, int $step): bool
     {
         switch ($step) {
             case 1:
@@ -239,12 +218,12 @@ class ScheduleController extends Controller
             case 2:
                 return $model->validate(["date", "car_id", "route_id"]);
             case 3:
+                // Валидируем основные поля и route_stop_key
                 return $model->validate([
                     "date",
                     "car_id",
                     "route_id",
-                    "stop_id",
-                    "stop_number",
+                    "route_stop_key",
                 ]);
             case 4:
                 return $model->validate();
@@ -258,9 +237,8 @@ class ScheduleController extends Controller
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $id ID
      * @return string|\yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($id)
+    public function actionUpdate(int $id)
     {
         $model = $this->findModel($id);
 
@@ -281,10 +259,10 @@ class ScheduleController extends Controller
      * Deletes an existing Schedule model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $id ID
-     * @return \yii\web\Response
-     * @throws NotFoundHttpException if the model cannot be found
+     * @return Response
+     * @throws NotFoundHttpException
      */
-    public function actionDelete($id): \yii\web\Response
+    public function actionDelete(int $id): Response
     {
         $this->findModel($id)->delete();
 
@@ -298,7 +276,7 @@ class ScheduleController extends Controller
      * @return Schedule the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id): Schedule
+    protected function findModel(int $id): Schedule
     {
         if (($model = Schedule::findOne(["id" => $id])) !== null) {
             return $model;

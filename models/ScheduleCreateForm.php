@@ -13,7 +13,7 @@ use yii\base\Model;
 /**
  * Form-модель для пошагового мастера создания расписания
  */
-class ScheduleWizardForm extends Model
+class ScheduleCreateForm extends Model
 {
     // Общие данные
     public $date;
@@ -82,15 +82,48 @@ class ScheduleWizardForm extends Model
             [["route_id"], "validateRouteAvailability"],
 
             // Шаг 3
-            [["route_stop_key"], "required", "when" => function ($model) {
-                return $model->current_step >= 3;
-            }],
+            [
+                ["route_stop_key"],
+                "required",
+                "when" => function ($model) {
+                    return $model->current_step >= 3;
+                },
+            ],
             [["route_stop_key"], "validateRouteStopKey"],
-            [['stop_id', 'stop_number'], 'integer'],
-            [['stop_id'], 'exist', 'targetClass' => Stop::class, 'targetAttribute' => 'id'],
-            [['stop_number'], 'in', 'range' => array_keys(RouteStops::getStopNumberList())],
-            [['stop_id', 'stop_number'], 'validateStopBelongsToRoute'],
-            [['stop_id', 'stop_number'], 'validateStopAvailability'],
+            [["stop_id", "stop_number"], "integer"],
+            [
+                ["stop_id"],
+                "exist",
+                "targetClass" => Stop::class,
+                "targetAttribute" => "id",
+                "when" => function ($model) {
+                    return !empty($model->stop_id);
+                },
+            ],
+            [
+                ["stop_number"],
+                "in",
+                "range" => array_keys(RouteStops::getStopNumberList()),
+                "when" => function ($model) {
+                    return !empty($model->stop_number);
+                },
+            ],
+            [
+                ["stop_id", "stop_number"],
+                "validateStopBelongsToRoute",
+                "when" => function ($model) {
+                    return !empty($model->stop_id) &&
+                        !empty($model->stop_number);
+                },
+            ],
+            [
+                ["stop_id", "stop_number"],
+                "validateStopAvailability",
+                "when" => function ($model) {
+                    return !empty($model->stop_id) &&
+                        !empty($model->stop_number);
+                },
+            ],
 
             // Шаг 4
             [["planned_time", "actual_time"], "time", "format" => "php:H:i"],
@@ -203,17 +236,33 @@ class ScheduleWizardForm extends Model
      */
     public function validateRouteStopKey($attribute, $params)
     {
-        if (!empty($this->route_stop_key) && strpos($this->route_stop_key, "_") !== false) {
-            $parts = explode("_", $this->route_stop_key);
-            if (count($parts) == 2) {
-                $this->stop_id = (int)$parts[0];
-                $this->stop_number = (int)$parts[1];
-            } else {
-                $this->addError($attribute, "Неверный формат ключа остановки.");
-            }
-        } else {
+        if (empty($this->route_stop_key)) {
             $this->addError($attribute, "Остановка не выбрана.");
+            return;
         }
+
+        if (strpos($this->route_stop_key, "_") === false) {
+            $this->addError($attribute, "Неверный формат ключа остановки.");
+            return;
+        }
+
+        $parts = explode("_", $this->route_stop_key);
+        if (count($parts) != 2 || empty($parts[0]) || empty($parts[1])) {
+            $this->addError($attribute, "Неверный формат ключа остановки.");
+            return;
+        }
+
+        $stopId = (int) $parts[0];
+        $stopNumber = (int) $parts[1];
+
+        if ($stopId <= 0 || $stopNumber <= 0) {
+            $this->addError($attribute, "Некорректные данные остановки.");
+            return;
+        }
+
+        // Если валидация прошла успешно, заполняем поля
+        $this->stop_id = $stopId;
+        $this->stop_number = $stopNumber;
     }
 
     /**
@@ -225,8 +274,8 @@ class ScheduleWizardForm extends Model
         if (!empty($this->stop_id) && strpos($this->stop_id, "_") !== false) {
             $parts = explode("_", $this->stop_id);
             if (count($parts) == 2) {
-                $actualStopId = (int)$parts[0];
-                $actualStopNumber = (int)$parts[1];
+                $actualStopId = (int) $parts[0];
+                $actualStopNumber = (int) $parts[1];
             } else {
                 $this->addError(
                     $attribute,
@@ -235,8 +284,8 @@ class ScheduleWizardForm extends Model
                 return;
             }
         } else {
-            $actualStopId = (int)$this->stop_id;
-            $actualStopNumber = (int)$this->stop_number;
+            $actualStopId = (int) $this->stop_id;
+            $actualStopNumber = (int) $this->stop_number;
         }
 
         if (
@@ -397,7 +446,9 @@ class ScheduleWizardForm extends Model
             if ($existingSchedulesCount < $routeStopsCount) {
                 $typeLabel =
                     Route::getTypeLabels()[$route->type] ?? $route->type;
-                $availableRoutes[$route->id] = "Маршрут №{$route->id} ({$typeLabel})";
+                $availableRoutes[
+                    $route->id
+                ] = "Маршрут №{$route->id} ({$typeLabel})";
             }
         }
 
@@ -436,7 +487,9 @@ class ScheduleWizardForm extends Model
 
             if (!$existingSchedule) {
                 $stopKey = $routeStop->stop_id . "_" . $routeStop->stop_number;
-                $availableStops[$stopKey] = "№{$routeStop->stop_number} — {$routeStop->stop->name}";
+                $availableStops[
+                    $stopKey
+                ] = "№{$routeStop->stop_number} — {$routeStop->stop->name}";
             }
         }
 
@@ -525,7 +578,6 @@ class ScheduleWizardForm extends Model
     {
         if ($this->current_step < 4) {
             $this->current_step++;
-            $this->saveToSession();
         }
     }
 
@@ -536,7 +588,6 @@ class ScheduleWizardForm extends Model
     {
         if ($this->current_step > 1) {
             $this->current_step--;
-            $this->saveToSession();
         }
     }
 
@@ -547,7 +598,6 @@ class ScheduleWizardForm extends Model
     {
         if ($step >= 1 && $step <= 4) {
             $this->current_step = $step;
-            $this->saveToSession();
         }
     }
 
@@ -566,11 +616,23 @@ class ScheduleWizardForm extends Model
                     !empty($this->car_id) &&
                     !empty($this->route_id);
             case 4:
+                // Проверяем либо route_stop_key, либо отдельные stop_id и stop_number
+                $hasStopData = false;
+                if (!empty($this->route_stop_key)) {
+                    $parts = explode("_", $this->route_stop_key);
+                    $hasStopData =
+                        count($parts) == 2 &&
+                        !empty($parts[0]) &&
+                        !empty($parts[1]);
+                } else {
+                    $hasStopData =
+                        !empty($this->stop_id) && !empty($this->stop_number);
+                }
+
                 return !empty($this->date) &&
                     !empty($this->car_id) &&
                     !empty($this->route_id) &&
-                    !empty($this->stop_id) &&
-                    !empty($this->stop_number);
+                    $hasStopData;
             default:
                 return false;
         }
@@ -598,9 +660,9 @@ class ScheduleWizardForm extends Model
     {
         if (!empty($this->stop_id) && strpos($this->stop_id, "_") !== false) {
             $parts = explode("_", $this->stop_id);
-            return count($parts) == 2 ? (int)$parts[0] : null;
+            return count($parts) == 2 ? (int) $parts[0] : null;
         }
-        return (int)$this->stop_id;
+        return (int) $this->stop_id;
     }
 
     /**
@@ -610,8 +672,8 @@ class ScheduleWizardForm extends Model
     {
         if (!empty($this->stop_id) && strpos($this->stop_id, "_") !== false) {
             $parts = explode("_", $this->stop_id);
-            return count($parts) == 2 ? (int)$parts[1] : null;
+            return count($parts) == 2 ? (int) $parts[1] : null;
         }
-        return (int)$this->stop_number;
+        return (int) $this->stop_number;
     }
 }

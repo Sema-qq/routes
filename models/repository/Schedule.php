@@ -23,6 +23,9 @@ use Yii;
  */
 class Schedule extends \yii\db\ActiveRecord
 {
+    const DATE_FORMAT = "php:d.m.Y";
+    const TIME_FORMAT = "php:H:i";
+
     /**
      * {@inheritdoc}
      */

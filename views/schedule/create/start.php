@@ -1,14 +1,15 @@
 <?php
 
+use app\models\repository\Schedule;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Breadcrumbs;
 
 /** @var yii\web\View $this */
-/** @var app\models\ScheduleWizardForm $model */
+/** @var app\models\ScheduleCreateForm $model */
 
 $this->title = "Создание расписания - Выбор даты";
-$this->registerCssFile("@web/css/wizard.css");
+$this->registerCssFile("@web/css/create.css");
 $this->params["breadcrumbs"][] = ["label" => "Расписание", "url" => ["index"]];
 $this->params["breadcrumbs"][] = $this->title;
 ?>
@@ -45,7 +46,7 @@ $this->params["breadcrumbs"][] = $this->title;
                     </div>
 
                     <?php $form = ActiveForm::begin([
-                        "id" => "wizard-start-form",
+                        "id" => "create-start-form",
                         "options" => ["class" => "form-horizontal"],
                         "fieldConfig" => [
                             "template" =>
@@ -68,8 +69,8 @@ $this->params["breadcrumbs"][] = $this->title;
 
                     <?= $form->field($model, "date")->input("date", [
                         "class" => "form-control",
-                        "min" => date("Y-m-d"),
-                        "max" => date("Y-m-d", strtotime("+1 year")),
+                        "required" => true,
+                        "format" => Schedule::DATE_FORMAT,
                     ]) ?>
 
                     <div class="form-group row">
@@ -79,7 +80,7 @@ $this->params["breadcrumbs"][] = $this->title;
                                     '<i class="fas fa-arrow-right"></i> Начать создание',
                                     [
                                         "class" => "btn btn-primary",
-                                        "id" => "start-wizard-btn",
+                                        "id" => "start-create-btn",
                                     ],
                                 ) ?>
 
