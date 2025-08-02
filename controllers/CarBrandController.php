@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\repository\CarBrand;
 use app\models\repository\CarBrandSearch;
+use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -111,7 +112,14 @@ class CarBrandController extends Controller
      */
     public function actionDelete($id): \yii\web\Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        if ($model->cantBeDeleted()) {
+            Yii::$app->session->setFlash('error', "Нельзя удалить бренд '{$model->name}', он используется в маршрутках.");
+            return $this->redirect(['index']);
+        }
+
+        $model->delete();
+        Yii::$app->session->setFlash('success', "Бренд '{$model->name}' успешно удалён.");
 
         return $this->redirect(['index']);
     }

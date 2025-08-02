@@ -29,6 +29,12 @@ $this->params['breadcrumbs'][] = 'Update';
 
         <?php $form = ActiveForm::begin(); ?>
 
+        <?php if ($model->hasErrors()): ?>
+            <div class="alert alert-danger">
+                <?= $form->errorSummary($model); ?>
+            </div>
+        <?php endif; ?>
+
         <div class="form-group">
             <div class="form-control-plaintext">
                 <label><b>Маршрутка:</b></label>

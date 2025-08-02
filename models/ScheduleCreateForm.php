@@ -44,7 +44,7 @@ class ScheduleCreateForm extends Model
     {
         return [
             [["date"], "required"],
-            [["date"], "date", "format" => Schedule::DATE_FORMAT],
+            [["date"], "date", "format" => "php:Y-m-d"],
 
             // Шаг 1
             [["car_id"], "integer"],
@@ -388,6 +388,7 @@ class ScheduleCreateForm extends Model
         }
 
         $cars = Car::find()
+            ->availableYear()
             ->joinWith("routes")
             ->where(["not", ["routes.id" => null]])
             ->groupBy("cars.id")

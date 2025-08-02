@@ -21,9 +21,14 @@ $this->params["breadcrumbs"][] = "Изменение";
     <h1><?= Html::encode($this->title) ?></h1>
 
 
-
     <div class="schedule-form">
         <?php $form = ActiveForm::begin(); ?>
+
+        <?php if ($model->hasErrors()): ?>
+            <div class="alert alert-danger">
+                <?= $form->errorSummary($model); ?>
+            </div>
+        <?php endif; ?>
 
         <div class="form-group">
             <label><b>Дата</b></label>

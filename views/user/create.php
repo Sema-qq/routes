@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /** @var app\models\repository\User $model */
 
 $this->title = 'Создание Владельца/Водителя';
-$this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Владельцы/водители', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-create">

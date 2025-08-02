@@ -62,15 +62,15 @@ class ScheduleSearch extends Schedule
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
-            'date' => $this->date,
-            'car_id' => $this->car_id,
-            'route_id' => $this->route_id,
-            'stop_id' => $this->stop_id,
-            'stop_number' => $this->stop_number,
-            'planned_time' => $this->planned_time,
-            'actual_time' => $this->actual_time,
-            'boarded_count' => $this->boarded_count,
+            'schedules.id' => $this->id,
+            'schedules.date' => $this->date,
+            'schedules.car_id' => $this->car_id,
+            'schedules.route_id' => $this->route_id,
+            'schedules.stop_id' => $this->stop_id,
+            'schedules.stop_number' => $this->stop_number,
+            'schedules.planned_time' => $this->planned_time,
+            'schedules.actual_time' => $this->actual_time,
+            'schedules.boarded_count' => $this->boarded_count,
         ]);
 
         if ($this->route_type) {

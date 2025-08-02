@@ -66,4 +66,8 @@ class CarBrand extends \yii\db\ActiveRecord
         return new CarBrandQuery(get_called_class());
     }
 
+    public function cantBeDeleted(): bool
+    {
+        return $this->getCars()->exists();
+    }
 }

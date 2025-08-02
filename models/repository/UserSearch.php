@@ -60,10 +60,19 @@ class UserSearch extends User
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'license_date' => $this->license_date,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ]);
+
+        if ($this->license_date) {
+            $query->andFilterWhere(['like', "to_char(license_date, 'YYYY-MM-DD')", $this->license_date]);
+        }
+
+        if ($this->created_at) {
+            $query->andFilterWhere(['like', "to_char(created_at, 'YYYY-MM-DD HH24:MI:SS')", $this->created_at]);
+        }
+
+        if ($this->updated_at) {
+            $query->andFilterWhere(['like', "to_char(updated_at, 'YYYY-MM-DD HH24:MI:SS')", $this->updated_at]);
+        }
 
         $query->andFilterWhere(['ilike', 'full_name', $this->full_name]);
 

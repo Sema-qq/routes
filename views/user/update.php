@@ -6,9 +6,9 @@ use yii\helpers\Html;
 /** @var app\models\repository\User $model */
 
 $this->title = 'Редактирование: ' . $model->full_name;
-$this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->params['breadcrumbs'][] = ['label' => 'Владельцы/водители', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->full_name, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = 'Изменение';
 ?>
 <div class="user-update">
 

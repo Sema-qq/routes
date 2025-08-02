@@ -10,6 +10,8 @@ $this->title = $model->id;
 $this->params['breadcrumbs'][] = ['label' => 'Маршрутки', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
+
+
 ?>
 <div class="car-view">
 
@@ -32,11 +34,26 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'fare',
             'production_year',
-            'owner_id',
-            'driver_id',
+            [
+                'attribute' => 'owner_id',
+                'value' => function ($model) {
+                    return $model->owner->full_name;
+                }
+            ],
+            [
+                'attribute' => 'driver_id',
+                'value' => function ($model) {
+                    return $model->driver->full_name;
+                }
+            ],
             'created_at',
             'updated_at',
-            'brand_id',
+            [
+                'attribute' => 'brand_id',
+                'value' => function ($model) {
+                    return $model->brand->name;
+                }
+            ],
             'model',
         ],
     ]) ?>

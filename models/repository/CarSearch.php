@@ -11,6 +11,8 @@ use app\models\repository\Car;
  */
 class CarSearch extends Car
 {
+    public string $brand_country = '';
+
     /**
      * {@inheritdoc}
      */
@@ -19,6 +21,7 @@ class CarSearch extends Car
         return [
             [['id', 'fare', 'production_year', 'owner_id', 'driver_id', 'brand_id'], 'integer'],
             [['created_at', 'updated_at', 'model'], 'safe'],
+            [['brand_country'], 'string'],
         ];
     }
 
@@ -43,10 +46,32 @@ class CarSearch extends Car
     {
         $query = Car::find();
 
-        // add conditions that should always apply here
+        // Присоединяем таблицу брендов всегда (для сортировки и фильтрации)
+        $query->joinWith(['brand']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+        ]);
+
+        // Сортировка по brand_country (car_brand.country)
+        $dataProvider->setSort([
+            'attributes' => [
+                'id',
+                'fare',
+                'production_year',
+                'model',
+                'owner_id',
+                'driver_id',
+                'brand_id',
+                'created_at',
+                'updated_at',
+                'brand_country' => [
+                    'asc' => ['car_brand.country' => SORT_ASC],
+                    'desc' => ['car_brand.country' => SORT_DESC],
+                    'default' => SORT_ASC,
+                    'label' => 'Страна производителя',
+                ],
+            ],
         ]);
 
         $this->load($params, $formName);
@@ -64,12 +89,22 @@ class CarSearch extends Car
             'production_year' => $this->production_year,
             'owner_id' => $this->owner_id,
             'driver_id' => $this->driver_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
             'brand_id' => $this->brand_id,
         ]);
 
         $query->andFilterWhere(['ilike', 'model', $this->model]);
+
+        if ($this->created_at) {
+            $query->andFilterWhere(['like', "to_char(created_at, 'YYYY-MM-DD HH24:MI:SS')", $this->created_at]);
+        }
+
+        if ($this->updated_at) {
+            $query->andFilterWhere(['like', "to_char(updated_at, 'YYYY-MM-DD HH24:MI:SS')", $this->updated_at]);
+        }
+
+        if (strlen(trim($this->brand_country)) > 0) {
+            $query->andFilterWhere(['ilike', 'car_brand.country', $this->brand_country]);
+        }
 
         return $dataProvider;
     }

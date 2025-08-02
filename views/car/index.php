@@ -37,7 +37,13 @@ $driverItems = ArrayHelper::map(
 );
 
 // Производители
-$brandItems = ArrayHelper::map(CarBrand::find()->all(), 'id', 'name');
+$brands = CarBrand::find()->all();
+$brandItems = ArrayHelper::map($brands, 'id', 'name');
+
+$countries = [];
+foreach ($brands as $brand) {
+    $countries[$brand->country] = $brand->country;
+}
 ?>
 <div class="car-index">
 
@@ -84,6 +90,15 @@ $brandItems = ArrayHelper::map(CarBrand::find()->all(), 'id', 'name');
                     return $model->brand->name ?? null;
                 },
                 'filter' => $brandItems,
+            ],
+            [
+                'attribute' => 'brand_country',
+                'label' => 'Страна<br>производителя',
+                "encodeLabel" => false,
+                'value' => function ($model) {
+                    return $model->brand->country ?? null;
+                },
+                'filter' => $countries,
             ],
             'created_at',
             'updated_at',

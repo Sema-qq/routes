@@ -62,9 +62,15 @@ class RouteSearch extends Route
             'id' => $this->id,
             'car_id' => $this->car_id,
             'type' => $this->type,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ]);
+
+        if ($this->created_at) {
+            $query->andFilterWhere(['like', "to_char(created_at, 'YYYY-MM-DD HH24:MI:SS')", $this->created_at]);
+        }
+
+        if ($this->updated_at) {
+            $query->andFilterWhere(['like', "to_char(updated_at, 'YYYY-MM-DD HH24:MI:SS')", $this->updated_at]);
+        }
 
         return $dataProvider;
     }

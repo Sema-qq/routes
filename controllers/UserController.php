@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\repository\User;
 use app\models\repository\UserSearch;
+use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -111,7 +112,17 @@ class UserController extends Controller
      */
     public function actionDelete($id): \yii\web\Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        if ($model->cantBeDeleted()) {
+            Yii::$app->session->setFlash(
+                'error',
+                "Нельзя удалить пользователя '{$model->full_name}', если он является владельцем или водителем автомобиля.");
+
+            return $this->redirect(['index']);
+        }
+
+        $model->delete();
+        Yii::$app->session->setFlash('success', "Пользователь '{$model->full_name}' успешно удалён.");
 
         return $this->redirect(['index']);
     }

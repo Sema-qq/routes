@@ -32,8 +32,9 @@ class User extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['license_date'], 'default', 'value' => null],
             [['full_name'], 'required'],
+            [['license_date'], 'default', 'value' => null],
+            [['license_date'], 'validateLicenseDate'],
             [['license_date', 'created_at', 'updated_at'], 'safe'],
             [['full_name'], 'string', 'max' => 255],
         ];
@@ -105,5 +106,34 @@ class User extends \yii\db\ActiveRecord
             ->where(['<=', 'license_date', $threeYearsAgo])
             ->andWhere(['IS NOT', 'license_date', null])
             ->all();
+    }
+
+    public function cantBeDeleted(): bool
+    {
+        if ($this->getOwnerCars()->exists()) {
+            return true;
+        }
+
+        if ($this->getDriverCars()->exists()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Запрещаем изменять водилки на невалидные, если водитель уже назначен куда-то
+     * @param $attribute
+     * @return void
+     */
+    public function validateLicenseDate($attribute)
+    {
+        if ($this->getDriverCars()->exists() && $this->$attribute) {
+            $threeYearsAgo = strtotime('-3 years');
+            $enteredDate = strtotime($this->$attribute);
+            if ($enteredDate > $threeYearsAgo) {
+                $this->addError($attribute, 'Дата В.У. не может быть моложе 3 лет, так как пользователь уже назначен водителем маршрутки.');
+            }
+        }
     }
 }

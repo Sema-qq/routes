@@ -12,6 +12,12 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
+    <?php if ($model->hasErrors()): ?>
+        <div class="alert alert-danger">
+            <?= $form->errorSummary($model); ?>
+        </div>
+    <?php endif; ?>
+
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'country')->textInput(['maxlength' => true]) ?>
