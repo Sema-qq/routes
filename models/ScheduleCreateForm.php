@@ -44,7 +44,7 @@ class ScheduleCreateForm extends Model
     {
         return [
             [["date"], "required"],
-            [["date"], "date", "format" => "php:Y-m-d"],
+            [["date"], "date", "format" => Schedule::DATE_FORMAT],
 
             // Шаг 1
             [["car_id"], "integer"],
@@ -126,7 +126,7 @@ class ScheduleCreateForm extends Model
             ],
 
             // Шаг 4
-            [["planned_time", "actual_time"], "time", "format" => "php:H:i"],
+            [["planned_time", "actual_time"], "time", "format" => Schedule::TIME_FORMAT],
             [["boarded_count"], "integer", "min" => 0],
             [["boarded_count"], "default", "value" => 0],
             [["planned_time", "actual_time"], "default", "value" => null],

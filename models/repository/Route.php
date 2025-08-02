@@ -19,8 +19,8 @@ use Yii;
  */
 class Route extends \yii\db\ActiveRecord
 {
-    public const TYPE_DIRECT = 'direct';
-    public const TYPE_REVERSE = 'reverse';
+    public const TYPE_DIRECT = "direct";
+    public const TYPE_REVERSE = "reverse";
 
     /**
      * Массив id остановок по порядку (виртуальное поле для формы)
@@ -33,7 +33,7 @@ class Route extends \yii\db\ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'routes';
+        return "routes";
     }
 
     /**
@@ -42,17 +42,33 @@ class Route extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['car_id', 'type'], 'required'],
-            [['car_id'], 'default', 'value' => null],
-            [['car_id'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
-            [['type'], 'in', 'range' => [self::TYPE_DIRECT, self::TYPE_REVERSE]],
-            [['car_id', 'type'], 'unique', 'targetAttribute' => ['car_id', 'type'], 'message' => 'Для этой маршрутки уже существует маршрут такого типа.'],
-            [['car_id'], 'exist', 'skipOnError' => true, 'targetClass' => Car::class, 'targetAttribute' => ['car_id' => 'id']],
+            [["car_id", "type"], "required"],
+            [["car_id"], "default", "value" => null],
+            [["car_id"], "integer"],
+            [["created_at", "updated_at"], "safe"],
+            [
+                ["type"],
+                "in",
+                "range" => [self::TYPE_DIRECT, self::TYPE_REVERSE],
+            ],
+            [
+                ["car_id", "type"],
+                "unique",
+                "targetAttribute" => ["car_id", "type"],
+                "message" =>
+                    "Для этой маршрутки уже существует маршрут такого типа.",
+            ],
+            [
+                ["car_id"],
+                "exist",
+                "skipOnError" => true,
+                "targetClass" => Car::class,
+                "targetAttribute" => ["car_id" => "id"],
+            ],
             // поле для сохранения связей
-            ['stop_ids', 'required'],
-            ['stop_ids', 'each', 'rule' => ['integer']],
-            ['stop_ids', 'validateStopsCount'],
+            ["stop_ids", "required"],
+            ["stop_ids", "each", "rule" => ["integer"]],
+            ["stop_ids", "validateStopsCount"],
         ];
     }
 
@@ -62,19 +78,19 @@ class Route extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => 'ID',
-            'car_id' => 'Маршрутка',
-            'type' => 'Тип маршрута',
-            'created_at' => 'Дата создания',
-            'updated_at' => 'Дата обновления',
+            "id" => "ID",
+            "car_id" => "Маршрутка",
+            "type" => "Тип маршрута",
+            "created_at" => "Дата создания",
+            "updated_at" => "Дата обновления",
         ];
     }
 
     public static function getTypeLabels(): array
     {
         return [
-            self::TYPE_DIRECT => 'Прямой',
-            self::TYPE_REVERSE => 'Обратный',
+            self::TYPE_DIRECT => "Прямой",
+            self::TYPE_REVERSE => "Обратный",
         ];
     }
 
@@ -82,9 +98,9 @@ class Route extends \yii\db\ActiveRecord
     {
         if (parent::beforeSave($insert)) {
             if ($insert) {
-                $this->created_at = date('Y-m-d H:i:s');
+                $this->created_at = date("Y-m-d H:i:s");
             }
-            $this->updated_at = date('Y-m-d H:i:s');
+            $this->updated_at = date("Y-m-d H:i:s");
             return true;
         }
         return false;
@@ -97,7 +113,7 @@ class Route extends \yii\db\ActiveRecord
      */
     public function getCar()
     {
-        return $this->hasOne(Car::class, ['id' => 'car_id']);
+        return $this->hasOne(Car::class, ["id" => "car_id"]);
     }
 
     /**
@@ -107,7 +123,7 @@ class Route extends \yii\db\ActiveRecord
      */
     public function getRouteStops()
     {
-        return $this->hasMany(RouteStops::class, ['route_id' => 'id']);
+        return $this->hasMany(RouteStops::class, ["route_id" => "id"]);
     }
 
     /**
@@ -117,7 +133,7 @@ class Route extends \yii\db\ActiveRecord
      */
     public function getSchedules()
     {
-        return $this->hasMany(Schedule::class, ['route_id' => 'id']);
+        return $this->hasMany(Schedule::class, ["route_id" => "id"]);
     }
 
     /**
@@ -133,7 +149,7 @@ class Route extends \yii\db\ActiveRecord
     {
         $count = count(array_filter($this->$attribute));
         if ($count !== 10) {
-            $this->addError($attribute, 'У маршрута должно быть 10 остановок.');
+            $this->addError($attribute, "У маршрута должно быть 10 остановок.");
         }
     }
 }

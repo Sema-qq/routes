@@ -19,6 +19,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a(
+            "Сбросить фильтры",
+            [Yii::$app->controller->id . "/index"],
+            ["class" => "btn btn-outline-secondary"],
+        ) ?>
     </p>
 
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>

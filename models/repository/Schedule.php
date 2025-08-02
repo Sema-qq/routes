@@ -40,14 +40,16 @@ class Schedule extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
+            [["planned_time", "actual_time"], "time", "format" => self::TIME_FORMAT],
+            [["boarded_count"], "integer", "min" => 0],
+            [["boarded_count"], "default", "value" => 0],
+            [["planned_time", "actual_time"], "default", "value" => null],
+
             [['date'], 'date', 'format' => 'php:Y-m-d'],
-            [['planned_time', 'actual_time'], 'time', 'format' => 'php:H:i'],
             [['stop_number'], 'integer', 'min' => RouteStops::STOP_NUMBER_MIN, 'max' => RouteStops::STOP_NUMBER_MAX],
 
-            [['planned_time', 'actual_time'], 'default', 'value' => null],
             [['boarded_count'], 'default', 'value' => 0],
             [['date', 'car_id', 'route_id', 'stop_id', 'stop_number'], 'required'],
-            [['date', 'planned_time', 'actual_time'], 'safe'],
             [['car_id', 'route_id', 'stop_id', 'stop_number', 'boarded_count'], 'default', 'value' => null],
             [['car_id', 'route_id', 'stop_id', 'stop_number', 'boarded_count'], 'integer'],
             [['car_id'], 'exist', 'skipOnError' => true, 'targetClass' => Car::class, 'targetAttribute' => ['car_id' => 'id']],

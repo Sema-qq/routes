@@ -242,12 +242,23 @@ class ScheduleController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (
-            $this->request->isPost &&
-            $model->load($this->request->post()) &&
-            $model->save()
-        ) {
-            return $this->redirect(["view", "id" => $model->id]);
+        if ($this->request->isPost) {
+            // Разрешаем редактировать только 3 поля
+            $allowedAttributes = [
+                "planned_time",
+                "actual_time",
+                "boarded_count",
+            ];
+
+            if ($model->load($this->request->post())) {
+                // Сохраняем только разрешенные атрибуты
+                if (
+                    $model->validate($allowedAttributes) &&
+                    $model->save(false, $allowedAttributes)
+                ) {
+                    return $this->redirect(["view", "id" => $model->id]);
+                }
+            }
         }
 
         return $this->render("update", [
