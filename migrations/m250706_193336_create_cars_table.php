@@ -11,10 +11,9 @@ class m250706_193336_create_cars_table extends Migration
     {
         $this->createTable('cars', [
             'id' => $this->primaryKey(),
-            'brand' => $this->string(),
+            'brand_id' => $this->integer()->notNull(),
+            'model' => $this->string()->notNull(),
             'fare' => $this->integer(),
-            'manufacturer' => $this->string(),
-            'country' => $this->string(),
             'production_year' => $this->integer(),
             'owner_id' => $this->integer()->notNull(),
             'driver_id' => $this->integer()->notNull(),
@@ -23,10 +22,28 @@ class m250706_193336_create_cars_table extends Migration
         ]);
         // foreign keys
         $this->addForeignKey(
-            'fk-cars-owner', 'cars', 'owner_id', 'users', 'id', 'CASCADE'
+            'fk-cars-brand_id',
+            '{{%cars}}',
+            'brand_id',
+            '{{%car_brand}}',
+            'id',
+            'RESTRICT'
         );
         $this->addForeignKey(
-            'fk-cars-driver', 'cars', 'driver_id', 'users', 'id', 'CASCADE'
+            'fk-cars-owner',
+            '{{%cars}}',
+            'owner_id',
+            '{{%users}}',
+            'id',
+            'RESTRICT'
+        );
+        $this->addForeignKey(
+            'fk-cars-driver',
+            '{{%cars}}',
+            'driver_id',
+            '{{%users}}',
+            'id',
+            'RESTRICT'
         );
     }
 

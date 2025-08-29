@@ -6,9 +6,9 @@ use yii\helpers\Html;
 /** @var app\models\repository\Stop $model */
 
 $this->title = 'Изменение остановки: ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => 'Stops', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Остановки', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Update';
+$this->params['breadcrumbs'][] = 'Редактирование';
 ?>
 <div class="stop-update">
 
