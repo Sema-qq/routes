@@ -8,12 +8,11 @@ use Yii;
  * This is the model class for table "routes".
  *
  * @property int $id
- * @property int $car_id
+ * @property string $code
  * @property string $type
  * @property string|null $created_at
  * @property string|null $updated_at
  *
- * @property Car $car
  * @property RouteStops[] $routeStops
  * @property Schedule[] $schedules
  */
@@ -42,9 +41,8 @@ class Route extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [["car_id", "type"], "required"],
-            [["car_id"], "default", "value" => null],
-            [["car_id"], "integer"],
+            [["code", "type"], "required"],
+            [["code"], "string", "max" => 16],
             [["created_at", "updated_at"], "safe"],
             [
                 ["type"],
@@ -52,18 +50,11 @@ class Route extends \yii\db\ActiveRecord
                 "range" => [self::TYPE_DIRECT, self::TYPE_REVERSE],
             ],
             [
-                ["car_id", "type"],
+                ["code", "type"],
                 "unique",
-                "targetAttribute" => ["car_id", "type"],
+                "targetAttribute" => ["code", "type"],
                 "message" =>
-                    "Для этой маршрутки уже существует маршрут такого типа.",
-            ],
-            [
-                ["car_id"],
-                "exist",
-                "skipOnError" => true,
-                "targetClass" => Car::class,
-                "targetAttribute" => ["car_id" => "id"],
+                    "Для этого маршрута уже существует маршрут такого типа.",
             ],
             // поле для сохранения связей
             ["stop_ids", "required"],
@@ -79,7 +70,7 @@ class Route extends \yii\db\ActiveRecord
     {
         return [
             "id" => "ID",
-            "car_id" => "Маршрутка",
+            "code" => "Номер/имя маршрута",
             "type" => "Тип маршрута",
             "created_at" => "Дата создания",
             "updated_at" => "Дата обновления",
@@ -104,16 +95,6 @@ class Route extends \yii\db\ActiveRecord
             return true;
         }
         return false;
-    }
-
-    /**
-     * Gets query for [[Car]].
-     *
-     * @return \yii\db\ActiveQuery|CarQuery
-     */
-    public function getCar()
-    {
-        return $this->hasOne(Car::class, ["id" => "car_id"]);
     }
 
     /**

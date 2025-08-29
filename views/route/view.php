@@ -33,12 +33,7 @@ YiiAsset::register($this);
         'model' => $model,
         'attributes' => [
             'id',
-            [
-                'attribute' => 'car_id',
-                'value' => function($model) {
-                    return $model->car->publicName();
-                }
-            ],
+            'code',
             [
                 'attribute' => 'type',
                 'value' => function($model) {

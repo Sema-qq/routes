@@ -12,19 +12,6 @@ use yii\grid\GridView;
 /** @var app\models\repository\RouteSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-// Все маршрутки, у которых есть хоть один маршрут
-$carItems = ArrayHelper::map(
-    Car::withRoutes(),
-    'id',
-    /**
-     * @return string
-     * @var Car $car
-     */
-    function(Car $car) {
-        return $car->publicName();
-    }
-);
-
 $this->title = 'Маршруты';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -50,13 +37,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'id',
-            [
-                'attribute' => 'car_id',
-                'value' => function($model) {
-                    return $model->car->publicName();
-                },
-                'filter' => $carItems,
-            ],
             [
                 'attribute' => 'type',
                 'value' => function($model) {

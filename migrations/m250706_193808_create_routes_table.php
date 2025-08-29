@@ -22,26 +22,17 @@ class m250706_193808_create_routes_table extends Migration
 
         $this->createTable('routes', [
             'id' => $this->primaryKey(),
-            'car_id' => $this->integer()->notNull(),
+            'code' => $this->string(16)->notNull(),
             'type' => "{$this->enumTypeName} NOT NULL", // 'direct'/'reverse'
             'created_at' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP'),
             'updated_at' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP')
         ]);
 
-        // add foreign keys
-        $this->addForeignKey(
-            'fk-routes-cars',
-            'routes',
-            'car_id',
-            'cars',
-            'id',
-            'CASCADE');
-
         // indexes
         $this->createIndex(
             'idx-unique-car-type',
             'routes',
-            ['car_id', 'type'],
+            ['code', 'type'],
             true
         );
     }

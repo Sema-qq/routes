@@ -17,7 +17,7 @@ class RouteSearch extends Route
     public function rules(): array
     {
         return [
-            [['id', 'car_id'], 'integer'],
+            [['id'], 'integer'],
             [['type', 'created_at', 'updated_at'], 'safe'],
         ];
     }
@@ -60,9 +60,12 @@ class RouteSearch extends Route
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'car_id' => $this->car_id,
             'type' => $this->type,
         ]);
+
+        if ($this->code) {
+            $query->andFilterWhere(['like', 'code', $this->code]);
+        }
 
         if ($this->created_at) {
             $query->andFilterWhere(['like', "to_char(created_at, 'YYYY-MM-DD HH24:MI:SS')", $this->created_at]);
