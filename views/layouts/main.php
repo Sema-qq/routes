@@ -14,44 +14,60 @@ use yii\bootstrap5\NavBar;
 AppAsset::register($this);
 
 $this->registerCsrfMetaTags();
-$this->registerMetaTag(['charset' => Yii::$app->charset], 'charset');
-$this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1, shrink-to-fit=no']);
-$this->registerMetaTag(['name' => 'description', 'content' => $this->params['meta_description'] ?? '']);
-$this->registerMetaTag(['name' => 'keywords', 'content' => $this->params['meta_keywords'] ?? '']);
-$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii::getAlias('@web/favicon.ico')]);
+$this->registerMetaTag(["charset" => Yii::$app->charset], "charset");
+$this->registerMetaTag([
+    "name" => "viewport",
+    "content" => "width=device-width, initial-scale=1, shrink-to-fit=no",
+]);
+$this->registerMetaTag([
+    "name" => "description",
+    "content" => $this->params["meta_description"] ?? "",
+]);
+$this->registerMetaTag([
+    "name" => "keywords",
+    "content" => $this->params["meta_keywords"] ?? "",
+]);
+$this->registerLinkTag([
+    "rel" => "icon",
+    "type" => "image/x-icon",
+    "href" => Yii::getAlias("@web/favicon.ico"),
+]);
 
-$this->title = 'Расписание маршруток';
+$this->title = "Расписание маршруток";
 ?>
-<?php $this->beginPage() ?>
+<?php $this->beginPage(); ?>
 <!DOCTYPE html>
 <html lang="<?= Yii::$app->language ?>" class="h-100">
 <head>
     <title><?= Html::encode($this->title) ?></title>
-    <?php $this->head() ?>
+    <?php $this->head(); ?>
 </head>
 <body class="d-flex flex-column h-100">
-<?php $this->beginBody() ?>
+<?php $this->beginBody(); ?>
 
 <header id="header">
     <?php
     NavBar::begin([
-        'brandLabel' => $this->title,
-        'brandUrl' => Yii::$app->homeUrl,
-        'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
+        "brandLabel" => $this->title,
+        "brandUrl" => Yii::$app->homeUrl,
+        "options" => [
+            "class" => "navbar-expand-md navbar-dark bg-dark fixed-top",
+        ],
     ]);
     echo Nav::widget([
-        'options' => ['class' => 'navbar-nav'],
-        'items' => [
-            ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'About', 'url' => ['/site/about']],
-            ['label' => 'Contact', 'url' => ['/site/contact']],
-            ['label' => 'Пользователи', 'url' => ['/user/index']],
-            ['label' => 'Маршрутки', 'url' => ['/car/index']],
-            ['label' => 'Производители', 'url' => ['/car-brand/index']],
-            ['label' => 'Остановки', 'url' => ['/stop/index']],
-            ['label' => 'Маршруты', 'url' => ['/route/index']],
-            ['label' => 'Расписания', 'url' => ['/schedule/index']],
-        ]
+        "options" => ["class" => "navbar-nav"],
+        "items" => [
+            ["label" => "Home", "url" => ["/site/index"]],
+            ["label" => "About", "url" => ["/site/about"]],
+            ["label" => "Contact", "url" => ["/site/contact"]],
+            ["label" => "Пользователи", "url" => ["/user/index"]],
+            ["label" => "Маршрутки", "url" => ["/car/index"]],
+            ["label" => "Производители", "url" => ["/car-brand/index"]],
+            ["label" => "Остановки", "url" => ["/stop/index"]],
+            ["label" => "Маршруты", "url" => ["/route/index"]],
+            ["label" => "Расписания", "url" => ["/schedule/index"]],
+            ["label" => "Отчеты", "url" => ["/report/index"]],
+        ],
     ]);
     NavBar::end();
     ?>
@@ -59,9 +75,11 @@ $this->title = 'Расписание маршруток';
 
 <main id="main" class="flex-shrink-0" role="main">
     <div class="container">
-        <?php if (!empty($this->params['breadcrumbs'])): ?>
-            <?= Breadcrumbs::widget(['links' => $this->params['breadcrumbs']]) ?>
-        <?php endif ?>
+        <?php if (!empty($this->params["breadcrumbs"])): ?>
+            <?= Breadcrumbs::widget([
+                "links" => $this->params["breadcrumbs"],
+            ]) ?>
+        <?php endif; ?>
         <?= Alert::widget() ?>
         <?= $content ?>
     </div>
@@ -70,13 +88,15 @@ $this->title = 'Расписание маршруток';
 <footer id="footer" class="mt-auto py-3 bg-light">
     <div class="container">
         <div class="row text-muted">
-            <div class="col-md-6 text-center text-md-start">Семенов Кирилл <?= date('Y') ?></div>
+            <div class="col-md-6 text-center text-md-start">Семенов Кирилл <?= date(
+                "Y",
+            ) ?></div>
             <div class="col-md-6 text-center text-md-end">Задание №9</div>
         </div>
     </div>
 </footer>
 
-<?php $this->endBody() ?>
+<?php $this->endBody(); ?>
 </body>
 </html>
-<?php $this->endPage() ?>
+<?php $this->endPage(); ?>
