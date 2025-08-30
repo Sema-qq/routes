@@ -1,17 +1,15 @@
-version: '3.8'
-
 services:
   php:
     image: yiisoftware/yii2-php:8.2-apache
     container_name: yii2-app
     volumes:
       - ./:/app
+      - ./docker/php/conf.d/php.ini:/usr/local/etc/php/conf.d/xdebug.ini
     ports:
       - "8080:80"      # приложение будет на http://localhost:8080
-      - "9003:9003"    # порт для Xdebug 3.x (по умолчанию)
     environment:
       XDEBUG_MODE: debug
-      XDEBUG_CONFIG: client_host=host.docker.internal
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
     depends_on:
       - db
 

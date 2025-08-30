@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\repository\Route;
 use app\models\repository\RouteSearch;
 use app\models\repository\RouteStops;
+use app\models\forms\CreateAutomaticRoute;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -21,17 +22,15 @@ class RouteController extends Controller
      */
     public function behaviors(): array
     {
-        return array_merge(
-            parent::behaviors(),
-            [
-                'verbs' => [
-                    'class' => VerbFilter::className(),
-                    'actions' => [
-                        'delete' => ['POST'],
-                    ],
+        return array_merge(parent::behaviors(), [
+            "verbs" => [
+                "class" => VerbFilter::class,
+                "actions" => [
+                    "delete" => ["POST"],
+                    "create-automatic" => ["POST"],
                 ],
-            ]
-        );
+            ],
+        ]);
     }
 
     /**
@@ -97,7 +96,6 @@ class RouteController extends Controller
         ]);
     }
 
-
     /**
      * Updates an existing Route model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -155,7 +153,42 @@ class RouteController extends Controller
     {
         $this->findModel($id)->delete();
 
-        return $this->redirect(['index']);
+        return $this->redirect(["index"]);
+    }
+
+    /**
+     * Создает автоматический маршрут (обратный или прямой) на основе существующего
+     * @param int $id ID исходного маршрута
+     * @return Response
+     */
+    public function actionCreateAutomatic(int $id): Response
+    {
+        $sourceRoute = Route::findOne($id);
+        if (!$sourceRoute) {
+            Yii::$app->session->setFlash("error", "Исходный маршрут не найден");
+            return $this->redirect(["index"]);
+        }
+
+        $form = new CreateAutomaticRoute();
+        $newRoute = $form->createRoute($sourceRoute);
+        if ($newRoute == null) {
+            // Получаем первую ошибку для отображения
+            $error = $form->getFirstError(CreateAutomaticRoute::ERR_ATTR);
+            $errorMessage = "Не удалось создать автоматический маршрут";
+
+            if ($error) {
+                $errorMessage = "{$errorMessage}: {$error}";
+            }
+
+            Yii::$app->session->setFlash("error", $errorMessage);
+            return $this->redirect(["view", "id" => $id]);
+        }
+
+        Yii::$app->session->setFlash(
+            "success",
+            "Автоматический маршрут успешно создан",
+        );
+        return $this->redirect(["view", "id" => $newRoute->id]);
     }
 
     /**
@@ -167,10 +200,10 @@ class RouteController extends Controller
      */
     protected function findModel($id): Route
     {
-        if (($model = Route::findOne(['id' => $id])) !== null) {
+        if (($model = Route::findOne(["id" => $id])) !== null) {
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException("The requested page does not exist.");
     }
 }

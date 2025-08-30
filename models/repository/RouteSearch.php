@@ -18,6 +18,7 @@ class RouteSearch extends Route
     {
         return [
             [['id'], 'integer'],
+            [['code'], 'string'],
             [['type', 'created_at', 'updated_at'], 'safe'],
         ];
     }

@@ -13,10 +13,10 @@ use yii\widgets\ActiveForm;
 // Все доступные остановки
 $stopItems = ArrayHelper::map(Stop::find()->all(), 'id', 'name');
 
-$this->title = 'Изменение маршрута: ' . $model->id;
+$this->title = 'Изменение маршрута: ' . $model->code;
 $this->params['breadcrumbs'][] = ['label' => 'Маршруты', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->id, 'url' => ['view', 'id' => $model->id]];
-$this->params['breadcrumbs'][] = 'Редактирование маршрута';
+$this->params['breadcrumbs'][] = ['label' => $model->code, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = 'Редактирование';
 ?>
 <div class="route-update">
 
