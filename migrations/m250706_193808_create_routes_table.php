@@ -35,6 +35,19 @@ class m250706_193808_create_routes_table extends Migration
             ['code', 'type'],
             true
         );
+
+        $this->batchInsert('routes', ['id', 'code', 'type'], [
+            [1, '№9', 'reverse'],
+            [2, '№9', 'direct'],
+            [3, '№39', 'direct'],
+            [4, '№39', 'reverse'],
+            [5, 'Одинаковые', 'direct'],
+            [6, 'Одинаковые', 'reverse'],
+            [7, 'Фортик', 'direct'],
+            [8, 'Фортик', 'reverse'],
+        ]);
+
+        $this->execute("SELECT setval(pg_get_serial_sequence('routes', 'id'), (SELECT MAX(id) FROM routes));");
     }
 
     public function safeDown(): void
