@@ -31,4 +31,37 @@ class RouteQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    /**
+     * Фильтр: есть хотя бы одно расписание
+     * @return RouteQuery
+     */
+    public function withSchedules(): RouteQuery
+    {
+        return $this
+            ->joinWith('schedules', false)
+            ->groupBy('routes.id')
+            ->having(['>', 'COUNT(schedules.id)', 0]);
+    }
+
+    /**
+     * Фильтр: нет ни одного расписание
+     * @return RouteQuery
+     */
+    public function withoutSchedules(): RouteQuery
+    {
+        return $this
+            ->joinWith('schedules', false)
+            ->groupBy('routes.id')
+            ->having(['=', 'COUNT(schedules.id)', 0]);
+    }
+
+    /**
+     * Фильтр: нет ни одного расписание
+     * @return RouteQuery
+     */
+    public function byCode(string $code): RouteQuery
+    {
+        return $this->where(["code" => $code]);
+    }
 }

@@ -45,6 +45,16 @@ class m250706_193954_create_route_stops_table extends Migration
             true // уникальный
         );
 
+        $this->batchInsertBaseData();
+    }
+
+    public function safeDown(): void
+    {
+        $this->dropTable('route_stops');
+    }
+
+    private function batchInsertBaseData()
+    {
         $this->batchInsert('route_stops', ['id', 'route_id', 'stop_id', 'stop_number'], [
             [11, 1, 1, 1],
             [12, 1, 6, 2],
@@ -129,10 +139,5 @@ class m250706_193954_create_route_stops_table extends Migration
         ]);
 
         $this->execute("SELECT setval(pg_get_serial_sequence('route_stops', 'id'), (SELECT MAX(id) FROM route_stops));");
-    }
-
-    public function safeDown(): void
-    {
-        $this->dropTable('route_stops');
     }
 }

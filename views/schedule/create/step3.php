@@ -1,13 +1,14 @@
 <?php
 
+use app\models\repository\Route;
 use app\models\repository\Schedule;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /** @var yii\web\View $this */
-/** @var app\models\ScheduleCreateForm $model */
+/** @var app\models\forms\ScheduleCreateForm $model */
 
-$this->title = "Создание расписания - Шаг 3: Выбор остановки";
+$this->title = "Создание расписания - Шаг 3: Выбор машины";
 $this->registerCssFile("@web/css/create.css");
 $this->params["breadcrumbs"][] = ["label" => "Расписание", "url" => ["index"]];
 $this->params["breadcrumbs"][] = [
@@ -25,8 +26,8 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fas fa-map-marker-alt"></i>
-                        Шаг 3: Выбор остановки
+                        <i class="fas fa-bus"></i>
+                        Шаг 3: Выбор машины
                     </h3>
                 </div>
                 <div class="card-body">
@@ -36,14 +37,10 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                             <div class="progress-bar bg-primary" role="progressbar" style="width: 75%"></div>
                         </div>
                         <div class="d-flex justify-content-between mt-2">
-                            <small class="text-success">
-                                <i class="fas fa-check"></i> 1. Маршрутка
-                            </small>
-                            <small class="text-success">
-                                <i class="fas fa-check"></i> 2. Маршрут
-                            </small>
-                            <small class="text-primary font-weight-bold">3. Остановка</small>
-                            <small class="text-muted">4. Данные</small>
+                            <small class="text-success">1. Маршрут</small>
+                            <small class="text-success">2. Направление</small>
+                            <small class="text-primary font-weight-bold">3. Машина</small>
+                            <small class="text-muted">4. Время</small>
                         </div>
                     </div>
 
@@ -57,50 +54,25 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                                     ]) ?>
                                 </li>
                                 <li class="breadcrumb-item">
-                                    <?php
-                                    $availableCars = $model->getAvailableCars();
-                                    $carName = isset(
-                                        $availableCars[$model->car_id],
-                                    )
-                                        ? $availableCars[$model->car_id]
-                                        : "Маршрутка #" . $model->car_id;
-                                    ?>
                                     <?= Html::a(
-                                        "Маршрутка: " . Html::encode($carName),
-                                        ["create-go-to-step", "step" => 1],
+                                        "Маршрут " . $model->route_code,
+                                        ["create-step", "step" => 1],
                                     ) ?>
                                 </li>
                                 <li class="breadcrumb-item">
-                                    <?php
-                                    $availableRoutes = $model->getAvailableRoutes();
-                                    $routeName = isset(
-                                        $availableRoutes[$model->route_id],
-                                    )
-                                        ? $availableRoutes[$model->route_id]
-                                        : "Маршрут #" . $model->route_id;
-                                    ?>
                                     <?= Html::a(
-                                        "Маршрут: " . Html::encode($routeName),
-                                        ["create-go-to-step", "step" => 2],
+                                        Route::getTypeLabels()[
+                                            $model->route_direction
+                                        ],
+                                        ["create-step", "step" => 2],
                                     ) ?>
                                 </li>
-                                <li class="breadcrumb-item active" aria-current="page">Остановка</li>
+                                <li class="breadcrumb-item active" aria-current="page">Машина</li>
                             </ol>
                         </nav>
                     </div>
 
-                    <?php
-                    // Предзаполняем route_stop_key из существующих данных
-                    if (
-                        empty($model->route_stop_key) &&
-                        !empty($model->stop_id) &&
-                        !empty($model->stop_number)
-                    ) {
-                        $model->route_stop_key =
-                            $model->stop_id . "_" . $model->stop_number;
-                    }
-
-                    $form = ActiveForm::begin([
+                    <?php $form = ActiveForm::begin([
                         "id" => "create-step3-form",
                         "options" => ["class" => "form-horizontal"],
                         "fieldConfig" => [
@@ -110,37 +82,45 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                                 "class" => "col-sm-4 control-label",
                             ],
                         ],
-                    ]);
-                    ?>
+                    ]); ?>
 
                     <div class="form-group row">
                         <div class="col-sm-8 offset-sm-4">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
-                                <strong>Выберите остановку</strong><br>
-                                Отображаются только те остановки выбранного маршрута, для которых еще нет расписания на выбранную дату.
-                                В списке указан номер остановки и её название.
+                                <strong>Выберите машину для маршрута <?= Html::encode(
+                                    $model->route_code,
+                                ) ?></strong><br>
+                                Отображаются только свободные машины, которые еще не назначены на этот маршрут на дату <?= $selectDate ?>.
                             </div>
                         </div>
                     </div>
 
                     <?php
-                    $availableStops = $model->getAvailableStops();
-                    if (empty($availableStops)): ?>
+                    $availableCars = $model->getAvailableCars();
+                    if (empty($availableCars)): ?>
                         <div class="form-group row">
                             <div class="col-sm-8 offset-sm-4">
                                 <div class="alert alert-warning">
                                     <i class="fas fa-exclamation-triangle"></i>
-                                    <strong>Нет доступных остановок</strong><br>
-                                    Для выбранного маршрута на дату <?= $selectDate ?> нет доступных остановок для создания расписания.
-                                    Для всех остановок уже созданы расписания.
+                                    <strong>Нет доступных машин</strong><br>
+                                    На дату <?= $selectDate ?> все машины уже назначены на маршрут <?= Html::encode(
+     $model->route_code,
+ ) ?> (<?= Html::encode(Route::getTypeLabels()[$model->route_direction]) ?>).
+                                    Попробуйте выбрать другую дату или другое направление маршрута.
                                 </div>
 
                                 <div class="btn-group">
                                     <?= Html::a(
-                                        '<i class="fas fa-arrow-left"></i> Выбрать другой маршрут',
-                                        ["create-go-to-step", "step" => 2],
+                                        '<i class="fas fa-arrow-left"></i> Изменить направление',
+                                        ["create-step", "step" => 2],
                                         ["class" => "btn btn-primary"],
+                                    ) ?>
+
+                                    <?= Html::a(
+                                        '<i class="fas fa-calendar"></i> Изменить дату',
+                                        ["create"],
+                                        ["class" => "btn btn-warning"],
                                     ) ?>
 
                                     <?= Html::a(
@@ -151,22 +131,15 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                                 </div>
                             </div>
                         </div>
-                    <?php
-                        // Создаем специальное поле для выбора остановки с комбинированным значением
-
-                        else: ?>
-                        <?php echo $form
-                            ->field($model, "route_stop_key", [
-                                "template" =>
-                                    '{label}<div class="col-sm-8">{input}{error}<div class="form-text">Формат: № остановки — название остановки</div></div>',
-                            ])
-                            ->dropDownList($availableStops, [
-                                "prompt" => "Выберите остановку...",
+                    <?php else: ?>
+                        <?= $form
+                            ->field($model, "car_id")
+                            ->dropDownList($availableCars, [
+                                "prompt" => "Выберите машину...",
                                 "class" => "form-control",
-                                "id" => "stop-select",
-                                "onchange" => "updateStopData(this.value)",
-                            ])
-                            ->label("Остановка и номер"); ?>
+                                "id" => "car-select",
+                                "required" => true,
+                            ]) ?>
 
                         <!-- Скрытые поля для сохранения данных -->
                         <?= $form
@@ -174,19 +147,15 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                             ->hiddenInput()
                             ->label(false) ?>
                         <?= $form
-                            ->field($model, "car_id")
+                            ->field($model, "route_code")
+                            ->hiddenInput()
+                            ->label(false) ?>
+                        <?= $form
+                            ->field($model, "route_direction")
                             ->hiddenInput()
                             ->label(false) ?>
                         <?= $form
                             ->field($model, "route_id")
-                            ->hiddenInput()
-                            ->label(false) ?>
-                        <?= $form
-                            ->field($model, "stop_id")
-                            ->hiddenInput()
-                            ->label(false) ?>
-                        <?= $form
-                            ->field($model, "stop_number")
                             ->hiddenInput()
                             ->label(false) ?>
                         <?= $form
@@ -210,9 +179,7 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                                         [
                                             "class" => "btn btn-primary",
                                             "name" => "next",
-                                            "disabled" => empty(
-                                                $model->stop_id
-                                            ),
+                                            "disabled" => empty($model->car_id),
                                             "id" => "next-btn",
                                         ],
                                     ) ?>
@@ -230,8 +197,8 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
 
                                 <div class="mt-2">
                                     <small class="text-muted">
-                                        Найдено доступных остановок: <strong><?= count(
-                                            $availableStops,
+                                        Найдено доступных машин: <strong><?= count(
+                                            $availableCars,
                                         ) ?></strong>
                                     </small>
                                 </div>
@@ -254,16 +221,15 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                     </h5>
                 </div>
                 <div class="card-body">
-                    <h6>Шаг 3: Выбор остановки</h6>
+                    <h6>Шаг 3: Выбор машины</h6>
                     <p class="small">
-                        На этом шаге вы выбираете остановку выбранного маршрута, для которой хотите создать расписание.
+                        На этом шаге вы выбираете конкретную машину, которая будет работать на выбранном маршруте.
                     </p>
 
                     <h6>Отображаются только:</h6>
                     <ul class="small">
-                        <li>Остановки выбранного маршрута</li>
-                        <li>Остановки, для которых еще нет расписания на выбранную дату</li>
-                        <li>Формат: "№ остановки — название остановки"</li>
+                        <li>Машины, которые еще не назначены на этот маршрут в выбранную дату</li>
+                        <li>Доступные для работы машины</li>
                     </ul>
 
                     <hr class="my-3">
@@ -273,47 +239,49 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                         <dt>Дата:</dt>
                         <dd><?= $selectDate ?></dd>
 
-                        <dt>Маршрутка:</dt>
-                        <dd class="text-success"><?= Html::encode(
-                            $carName,
-                        ) ?></dd>
-
                         <dt>Маршрут:</dt>
                         <dd class="text-success"><?= Html::encode(
-                            $routeName,
+                            $model->route_code,
+                        ) ?></dd>
+
+                        <dt>Направление:</dt>
+                        <dd class="text-success"><?= Html::encode(
+                            Route::getTypeLabels()[$model->route_direction],
                         ) ?></dd>
                     </dl>
 
-                    <?php if (!empty($availableStops)): ?>
+                    <?php if (!empty($availableCars)): ?>
                         <hr class="my-3">
-                        <h6>Доступно остановок:</h6>
+                        <h6>Доступно машин:</h6>
                         <span class="badge badge-info"><?= count(
-                            $availableStops,
+                            $availableCars,
                         ) ?></span>
                     <?php endif; ?>
                 </div>
             </div>
 
             <?php if (
-                !empty($model->stop_id) &&
-                !empty($model->stop_number)
+                !empty($model->car_id) &&
+                !empty($availableCars[$model->car_id])
             ): ?>
                 <div class="card mt-3">
                     <div class="card-header">
                         <h5 class="card-title">
                             <i class="fas fa-check-circle text-success"></i>
-                            Выбранная остановка
+                            Выбранная машина
                         </h5>
                     </div>
                     <div class="card-body">
-                        <?php
-                        $stopKey = $model->stop_id . "_" . $model->stop_number;
-                        if (isset($availableStops[$stopKey])): ?>
-                            <p class="font-weight-bold text-success">
-                                <?= Html::encode($availableStops[$stopKey]) ?>
-                            </p>
-                        <?php endif;
-                        ?>
+                        <p class="font-weight-bold text-success">
+                            <?= Html::encode($availableCars[$model->car_id]) ?>
+                        </p>
+                        <p class="small text-muted">
+                            Будет работать на маршруте <?= Html::encode(
+                                $model->route_code,
+                            ) ?> (<?= Html::encode(
+     Route::getTypeLabels()[$model->route_direction],
+ ) ?>)
+                        </p>
                     </div>
                 </div>
             <?php endif; ?>
@@ -322,13 +290,12 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
                 <div class="card-header">
                     <h5 class="card-title">
                         <i class="fas fa-lightbulb"></i>
-                        Подсказка
+                        Что дальше?
                     </h5>
                 </div>
                 <div class="card-body">
                     <p class="small text-muted">
-                        Номер остановки определяется порядком следования по маршруту.
-                        Если нужной остановки нет в списке, значит для неё уже создано расписание на эту дату.
+                        После выбора машины вы перейдете к последнему шагу - указанию времени прибытия для всех 10 остановок маршрута.
                     </p>
                 </div>
             </div>
@@ -336,70 +303,27 @@ $selectDate = Yii::$app->formatter->asDate($model->date, Schedule::DATE_FORMAT);
     </div>
 </div>
 
-<?php
-// Создаем массив для JavaScript с данными об остановках
-$stopDataJson = [];
-foreach ($availableStops as $key => $label) {
-    $parts = explode("_", $key);
-    if (count($parts) == 2) {
-        $stopDataJson[$key] = [
-            "stop_id" => (int) $parts[0],
-            "stop_number" => (int) $parts[1],
-            "label" => $label,
-        ];
-    }
-}
-
-$this->registerJs(
-    "
-    var stopData = " .
-        json_encode($stopDataJson) .
-        ";
-
-    function updateStopData(selectedKey) {
-        if (selectedKey && stopData[selectedKey]) {
-            // Заполняем скрытые поля
-            $('#schedulewizardform-stop_id').val(stopData[selectedKey].stop_id);
-            $('#schedulewizardform-stop_number').val(stopData[selectedKey].stop_number);
-
-            // Активируем кнопку 'Далее'
-            $('#next-btn').prop('disabled', false).removeClass('btn-secondary').addClass('btn-primary');
-        } else {
-            // Очищаем скрытые поля
-            $('#schedulewizardform-stop_id').val('');
-            $('#schedulewizardform-stop_number').val('');
-
-            $('#next-btn').prop('disabled', true).removeClass('btn-primary').addClass('btn-secondary');
-        }
-    }
-
+<?php $this->registerJs("
     // Включаем/отключаем кнопку 'Далее' в зависимости от выбора
-    $('#stop-select').on('change', function() {
-        updateStopData($(this).val());
-    });
+    $('#car-select').on('change', function() {
+        var selected = $(this).val();
+        $('#next-btn').prop('disabled', !selected);
 
-    // Инициализация состояния при загрузке страницы
-    $(document).ready(function() {
-        var selected = $('#stop-select').val();
         if (selected) {
-            updateStopData(selected);
+            $('#next-btn').removeClass('btn-secondary').addClass('btn-primary');
         } else {
-            // Проверяем, возможно данные уже есть в скрытых полях
-            var stopId = $('#schedulewizardform-stop_id').val();
-            var stopNumber = $('#schedulewizardform-stop_number').val();
-
-            if (stopId && stopNumber) {
-                // Формируем ключ и выбираем соответствующий элемент в dropdown
-                var key = stopId + '_' + stopNumber;
-                $('#stop-select').val(key);
-                updateStopData(key);
-            } else {
-                $('#next-btn').prop('disabled', true).removeClass('btn-primary').addClass('btn-secondary');
-            }
+            $('#next-btn').removeClass('btn-primary').addClass('btn-secondary');
         }
     });
-",
-);
 
+    // Инициализация состояния кнопки
+    $(document).ready(function() {
+        var selected = $('#car-select').val();
+        $('#next-btn').prop('disabled', !selected);
 
+        if (selected) {
+            $('#next-btn').removeClass('btn-secondary').addClass('btn-primary');
+        }
+    });
+");
 ?>

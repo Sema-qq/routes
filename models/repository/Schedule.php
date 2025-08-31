@@ -64,7 +64,7 @@ class Schedule extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => '№',
+            'id' => 'ID',
             'date' => 'Дата',
             'car_id' => 'Маршрутка',
             'route_id' => 'Маршрут',
@@ -115,4 +115,8 @@ class Schedule extends \yii\db\ActiveRecord
         return new ScheduleQuery(get_called_class());
     }
 
+    public function PublicName(): string
+    {
+        return $this->route->code . ' ' . Route::getTypeLabels()[$this->route->type];
+    }
 }

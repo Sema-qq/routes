@@ -1,12 +1,10 @@
 <?php
 
-use app\models\repository\Schedule;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-use yii\widgets\Breadcrumbs;
 
 /** @var yii\web\View $this */
-/** @var app\models\ScheduleCreateForm $model */
+/** @var app\models\forms\ScheduleCreateForm $model */
 
 $this->title = "Создание расписания - Выбор даты";
 $this->registerCssFile("@web/css/create.css");
@@ -21,7 +19,7 @@ $this->params["breadcrumbs"][] = $this->title;
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-calendar-plus"></i>
-                        Создание расписания поездки
+                        Создание расписания
                     </h3>
                 </div>
                 <div class="card-body">
@@ -31,17 +29,17 @@ $this->params["breadcrumbs"][] = $this->title;
                         </div>
                         <div class="d-flex justify-content-between mt-2">
                             <small class="text-muted">Выбор даты</small>
-                            <small class="text-muted">Маршрутка</small>
                             <small class="text-muted">Маршрут</small>
-                            <small class="text-muted">Остановка</small>
-                            <small class="text-muted">Данные</small>
+                            <small class="text-muted">Направление</small>
+                            <small class="text-muted">Машина</small>
+                            <small class="text-muted">Время</small>
                         </div>
                     </div>
 
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
                         <strong>Добро пожаловать в мастер создания расписания!</strong><br>
-                        Этот мастер поможет вам пошагово создать расписание поездки для маршрутки.
+                        Этот мастер поможет вам пошагово создать расписание для всех 10 остановок маршрута.
                         Начните с выбора даты, для которой хотите создать расписание.
                     </div>
 
@@ -62,7 +60,7 @@ $this->params["breadcrumbs"][] = $this->title;
                             <h4>Шаг 1: Выберите дату</h4>
                             <p class="text-muted">
                                 Выберите дату, для которой хотите создать расписание.
-                                Будут показаны только доступные маршрутки и маршруты.
+                                Расписание будет создано сразу для всех 10 остановок маршрута.
                             </p>
                         </div>
                     </div>
@@ -70,7 +68,7 @@ $this->params["breadcrumbs"][] = $this->title;
                     <?= $form->field($model, "date")->input("date", [
                         "class" => "form-control",
                         "required" => true,
-                        "format" => Schedule::DATE_FORMAT,
+                        "min" => date("Y-m-d"),
                     ]) ?>
 
                     <div class="form-group row">
@@ -107,23 +105,23 @@ $this->params["breadcrumbs"][] = $this->title;
                     </h5>
                 </div>
                 <div class="card-body">
-                    <h6>Как работает мастер:</h6>
+                    <h6>Как работает новый мастер:</h6>
                     <ol class="small">
                         <li><strong>Выбор даты</strong> - укажите дату для расписания</li>
-                        <li><strong>Выбор маршрутки</strong> - выберите из доступных маршруток</li>
-                        <li><strong>Выбор маршрута</strong> - выберите маршрут выбранной маршрутки</li>
-                        <li><strong>Выбор остановки</strong> - выберите остановку из маршрута</li>
-                        <li><strong>Ввод данных</strong> - укажите время и количество пассажиров</li>
+                        <li><strong>Выбор маршрута</strong> - выберите номер маршрута</li>
+                        <li><strong>Выбор направления</strong> - прямое или обратное направление</li>
+                        <li><strong>Выбор машины</strong> - выберите доступную машину</li>
+                        <li><strong>Указание времени</strong> - заполните время для всех 10 остановок</li>
                     </ol>
 
                     <hr class="my-3">
 
-                    <h6>Важные моменты:</h6>
+                    <h6>Что изменилось:</h6>
                     <ul class="small">
-                        <li>Показываются только доступные варианты</li>
-                        <li>Нельзя создать дубликаты расписания</li>
-                        <li>Можно вернуться к предыдущим шагам</li>
-                        <li>Данные сохраняются между шагами</li>
+                        <li>Теперь расписание создается сразу для всех 10 остановок</li>
+                        <li>Маршрут и машина разделены - одному маршруту могут быть назначены разные машины</li>
+                        <li>Направление маршрута выбирается отдельно</li>
+                        <li>Время указывается для всех остановок на одной странице</li>
                     </ul>
                 </div>
             </div>

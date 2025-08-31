@@ -2,13 +2,13 @@
 
 namespace app\controllers;
 
+use app\models\forms\ScheduleCreateForm;
 use app\models\repository\Schedule;
 use app\models\repository\ScheduleSearch;
-use app\models\ScheduleCreateForm;
+use Yii;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use Yii;
 use yii\web\Response;
 
 /**
@@ -146,16 +146,12 @@ class ScheduleController extends Controller
                 } elseif (isset($_POST["finish"])) {
                     // Финальная валидация и сохранение
                     if ($model->validate()) {
-                        $schedule = $model->createSchedule();
-                        if ($schedule) {
+                        if ($model->createSchedule()) {
                             Yii::$app->session->setFlash(
                                 "success",
-                                "Расписание успешно создано.",
+                                "Расписание успешно создано для всех 10 остановок.",
                             );
-                            return $this->redirect([
-                                "view",
-                                "id" => $schedule->id,
-                            ]);
+                            return $this->redirect(["index"]);
                         }
                     }
                 }
@@ -214,18 +210,31 @@ class ScheduleController extends Controller
     {
         switch ($step) {
             case 1:
-                return $model->validate(["date", "car_id"]);
+                return $model->validate(["date", "route_code"]);
             case 2:
-                return $model->validate(["date", "car_id", "route_id"]);
-            case 3:
-                // Валидируем основные поля и route_stop_key
+                // После выбора направления устанавливаем route_id
+                if (!empty($model->route_direction)) {
+                    $model->setRouteId();
+                }
                 return $model->validate([
                     "date",
-                    "car_id",
+                    "route_code",
+                    "route_direction",
                     "route_id",
-                    "route_stop_key",
+                ]);
+            case 3:
+                return $model->validate([
+                    "date",
+                    "route_code",
+                    "route_direction",
+                    "route_id",
+                    "car_id",
                 ]);
             case 4:
+                // Инициализируем данные остановок, если они еще не заполнены
+                if (empty($model->stops_data)) {
+                    $model->initializeStopsData();
+                }
                 return $model->validate();
             default:
                 return false;

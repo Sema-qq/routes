@@ -133,4 +133,13 @@ class Route extends \yii\db\ActiveRecord
             $this->addError($attribute, "У маршрута должно быть 10 остановок.");
         }
     }
+
+    /**
+     * Возвращает все маршруты имеющие расписание
+     * @return Route[]
+     */
+    public static function withSchedules(): array
+    {
+        return self::find()->withSchedules()->all();
+    }
 }

@@ -17,7 +17,7 @@ use yii\grid\GridView;
 
 // Все маршрутки, у которых есть хоть один маршрут
 $carItems = ArrayHelper::map(
-    Car::withRoutes(),
+    Car::withSchedules(),
     "id",
     /**
      * @return string
@@ -25,6 +25,18 @@ $carItems = ArrayHelper::map(
      */
     function (Car $car) {
         return $car->publicName();
+    },
+);
+
+$routeNames = ArrayHelper::map(
+    Route::withSchedules(),
+    "id",
+    /**
+     * @return string
+     * @var Route $route
+     */
+    function (Route $route) {
+        return $route->code;
     },
 );
 
@@ -83,14 +95,21 @@ $this->params["breadcrumbs"][] = $this->title;
             ],
             [
                 "attribute" => "car_id",
-                "value" => function ($model) {
+                "value" => function (Schedule $model) {
                     return $model->car->publicName();
                 },
                 "filter" => $carItems,
             ],
             [
                 "attribute" => "route_id",
-                "value" => function ($model) {
+                "value" => function (Schedule $model) {
+                    return $model->route->code;
+                },
+                "filter" => $routeNames,
+            ],
+            [
+                "attribute" => "route_id",
+                "value" => function (Schedule $model) {
                     return Route::getTypeLabels()[$model->route->type];
                 },
                 "filter" => Html::activeDropDownList(

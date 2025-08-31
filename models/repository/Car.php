@@ -164,11 +164,11 @@ class Car extends \yii\db\ActiveRecord
     }
 
     /**
-     * Возвращает все маршрутки имеющие маршруты
+     * Возвращает все маршрутки имеющие расписание на маршрутах
      * @return Car[]
      */
-    public static function withRoutes(): array
+    public static function withSchedules(): array
     {
-        return self::find()->withRoutes()->all();
+        return self::find()->withSchedules()->all();
     }
 }

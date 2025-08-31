@@ -55,14 +55,14 @@ class CarQuery extends \yii\db\ActiveQuery
     }
 
     /**
-     * Фильтр: есть хотя бы один маршрут
+     * Фильтр: есть хотя бы одно расписание
      * @return CarQuery
      */
-    public function withRoutes(): CarQuery
+    public function withSchedules(): CarQuery
     {
         return $this
-            ->joinWith('routes', false)
+            ->joinWith('schedules', false)
             ->groupBy('cars.id')
-            ->having(['>', 'COUNT(routes.id)', 0]);
+            ->having(['>', 'COUNT(schedules.id)', 0]);
     }
 }
