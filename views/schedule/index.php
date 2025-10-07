@@ -2,57 +2,37 @@
 
 use app\models\repository\Car;
 use app\models\repository\Route;
-use app\models\repository\RouteStops;
 use app\models\repository\Schedule;
-use app\models\repository\Stop;
+use app\models\repository\ScheduleGroup;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\helpers\Url;
 
 /** @var yii\web\View $this */
-/** @var app\models\repository\ScheduleSearch $searchModel */
-/** @var yii\data\ActiveDataProvider $dataProvider */
+/** @var app\models\repository\ScheduleGroupSearch $searchModel */
+/** @var yii\data\ArrayDataProvider $dataProvider */
 
-// Все маршрутки, у которых есть хоть один маршрут
+// Все машины, у которых есть расписания
 $carItems = ArrayHelper::map(
-    Car::withSchedules(),
+    Car::find()->joinWith("schedules")->groupBy("cars.id")->all(),
     "id",
-    /**
-     * @return string
-     * @var Car $car
-     */
     function (Car $car) {
         return $car->publicName();
     },
 );
 
-$routeNames = ArrayHelper::map(
-    Route::withSchedules(),
+// Все маршруты, у которых есть расписания
+$routeItems = ArrayHelper::map(
+    Route::find()->joinWith("schedules")->groupBy("routes.id")->all(),
     "id",
-    /**
-     * @return string
-     * @var Route $route
-     */
     function (Route $route) {
-        return $route->code;
+        return "№{$route->code} ({$route->getTypeLabels()[$route->type]})";
     },
 );
 
-$stopItems = ArrayHelper::map(
-    Stop::getUsedInRoutes(),
-    "id",
-    /**
-     * @return string
-     * @var Stop $stop
-     */
-    function (Stop $stop) {
-        return $stop->name;
-    },
-);
-
-$this->title = "Расписания";
+$this->title = "Расписания маршрутов";
 $this->params["breadcrumbs"][] = $this->title;
 ?>
 <div class="schedule-index">
@@ -61,7 +41,7 @@ $this->params["breadcrumbs"][] = $this->title;
 
     <p>
         <?= Html::a(
-            '<i class="fas fa-magic"></i> Добавить',
+            '<i class="fas fa-plus"></i> Создать расписание',
             ["create"],
             ["class" => "btn btn-success"],
         ) ?>
@@ -72,17 +52,13 @@ $this->params["breadcrumbs"][] = $this->title;
         ) ?>
     </p>
 
-    <?php
-    // echo $this->render('_search', ['model' => $searchModel]);
-    ?>
-
     <?= GridView::widget([
         "dataProvider" => $dataProvider,
         "filterModel" => $searchModel,
+        "tableOptions" => ["class" => "table table-striped table-bordered"],
         "columns" => [
             ["class" => "yii\grid\SerialColumn"],
 
-            "id",
             [
                 "attribute" => "date",
                 "format" => ["date", Schedule::DATE_FORMAT],
@@ -94,98 +70,105 @@ $this->params["breadcrumbs"][] = $this->title;
                 ),
             ],
             [
-                "attribute" => "car_id",
-                "value" => function (Schedule $model) {
-                    return $model->car->publicName();
+                "attribute" => "route_code",
+                "label" => "Маршрут",
+                "value" => function (ScheduleGroup $model) {
+                    return $model->route_code;
                 },
-                "filter" => $carItems,
+                "filter" => Html::textInput(
+                    $searchModel->formName() . "[route_code]",
+                    $searchModel->route_code,
+                    [
+                        "class" => "form-control",
+                        "placeholder" => "Номер маршрута",
+                    ],
+                ),
             ],
             [
-                "attribute" => "route_id",
-                "value" => function (Schedule $model) {
-                    return $model->route->code;
-                },
-                "filter" => $routeNames,
-            ],
-            [
-                "attribute" => "route_id",
-                "value" => function (Schedule $model) {
-                    return Route::getTypeLabels()[$model->route->type];
+                "attribute" => "route_type",
+                "label" => "Направление",
+                "value" => function (ScheduleGroup $model) {
+                    return $model->route_direction_label;
                 },
                 "filter" => Html::activeDropDownList(
                     $searchModel,
                     "route_type",
                     Route::getTypeLabels(),
-                    ["prompt" => "", "class" => "form-control"],
+                    ["prompt" => "Все", "class" => "form-control"],
                 ),
-                "encodeLabel" => false,
             ],
             [
-                "attribute" => "stop_id",
-                "value" => function ($model) {
-                    return $model->stop->name;
+                "attribute" => "car_id",
+                "label" => "Машина",
+                "value" => function (ScheduleGroup $model) {
+                    return $model->car_name;
                 },
-                "filter" => $stopItems,
-            ],
-            [
-                "attribute" => "stop_number",
                 "filter" => Html::activeDropDownList(
                     $searchModel,
-                    "stop_number",
-                    RouteStops::getStopNumberList(),
-                    ["prompt" => "", "class" => "form-control"],
+                    "car_id",
+                    $carItems,
+                    ["prompt" => "Все", "class" => "form-control"],
                 ),
             ],
             [
-                "attribute" => "planned_time",
-                "format" => ["time", Schedule::TIME_FORMAT],
-                "label" => "Планируемое<br>время<br>прибытия",
-                "encodeLabel" => false,
-                "filter" => Html::input(
-                    "time",
-                    $searchModel->formName() . "[planned_time]",
-                    $searchModel->planned_time,
-                    ["class" => "form-control"],
-                ),
-            ],
-            [
-                "attribute" => "actual_time",
-                "format" => ["time", Schedule::TIME_FORMAT],
-                "label" => "Фактическое<br>время<br>прибытия",
-                "encodeLabel" => false,
-                "filter" => Html::input(
-                    "time",
-                    $searchModel->formName() . "[actual_time]",
-                    $searchModel->actual_time,
-                    ["class" => "form-control"],
-                ),
-            ],
-            [
-                "attribute" => "boarded_count",
+                "label" => "Время работы",
                 "format" => "raw",
-                "label" => "Количество<br>вошедших",
-                "encodeLabel" => false,
-                "filter" => Html::input(
-                    "number",
-                    $searchModel->formName() . "[boarded_count]",
-                    $searchModel->boarded_count,
-                    ["class" => "form-control", "min" => 0],
-                ),
+                "value" => function (ScheduleGroup $model) {
+                    $first = $model->first_stop_time
+                        ? Yii::$app->formatter->asTime(
+                            $model->first_stop_time,
+                            "php:H:i",
+                        )
+                        : "—";
+                    $last = $model->last_stop_time
+                        ? Yii::$app->formatter->asTime(
+                            $model->last_stop_time,
+                            "php:H:i",
+                        )
+                        : "—";
+                    return "<small class='text-muted'>с</small> <strong>{$first}</strong><br><small class='text-muted'>по</small> <strong>{$last}</strong>";
+                },
             ],
             [
-                "class" => ActionColumn::className(),
-                "urlCreator" => function (
-                    $action,
-                    Schedule $model,
-                    $key,
-                    $index,
-                    $column
-                ) {
-                    return Url::toRoute([$action, "id" => $model->id]);
+                "label" => "Остановки",
+                "format" => "raw",
+                "value" => function (ScheduleGroup $model) {
+                    $percent = $model->getCompletionPercent();
+                    $statusClass = $model->getStatusClass();
+
+                    return "
+                        <div class='text-center'>
+                            <span class='badge {$statusClass}'>{$model->completed_stops}/{$model->stops_count}</span>
+                            <div class='progress mt-1' style='height: 6px;'>
+                                <div class='progress-bar bg-success' style='width: {$percent}%'></div>
+                            </div>
+                            <small class='text-muted'>{$percent}%</small>
+                        </div>
+                    ";
                 },
+            ],
+            [
+                "label" => "Пассажиры",
+                "format" => "raw",
+                "value" => function (ScheduleGroup $model) {
+                    if ($model->total_boarded > 0) {
+                        return $model->total_boarded;
+                    }
+                    return "—";
+                },
+            ],
+            [
+                'class' => ActionColumn::className(),
+                'urlCreator' => function ($action, ScheduleGroup $model, $key, $index, $column) {
+                    return Url::toRoute([
+                        $action,
+                        "date" => $model->date,
+                        "car_id" => $model->car_id,
+                        "route_id" => $model->route_id,
+                    ]);
+                }
             ],
         ],
     ]) ?>
-
 
 </div>

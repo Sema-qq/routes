@@ -28,6 +28,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <?php $form = ActiveForm::begin(); ?>
 
+        <?php if ($model->hasErrors()): ?>
+            <div class="alert alert-danger">
+                <?= $form->errorSummary($model, ["header" => "Исправьте ошибки в форме:"]); ?>
+            </div>
+        <?php endif; ?>
+
         <?= $form->field($model, 'code')->input('string', ['maxlength' => true]) ?>
 
         <?= $form->field($model, 'type')->dropDownList(

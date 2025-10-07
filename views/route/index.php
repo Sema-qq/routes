@@ -1,8 +1,6 @@
 <?php
 
-use app\models\repository\Car;
 use app\models\repository\Route;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;

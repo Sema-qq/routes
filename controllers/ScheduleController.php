@@ -5,6 +5,8 @@ namespace app\controllers;
 use app\models\forms\ScheduleCreateForm;
 use app\models\repository\Schedule;
 use app\models\repository\ScheduleSearch;
+use app\models\repository\ScheduleGroup;
+use app\models\repository\ScheduleGroupSearch;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
@@ -32,13 +34,13 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Lists all Schedule models.
+     * Lists all Schedule groups (grouped by route and date).
      *
      * @return string
      */
     public function actionIndex(): string
     {
-        $searchModel = new ScheduleSearch();
+        $searchModel = new ScheduleGroupSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render("index", [
@@ -48,15 +50,42 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Displays a single Schedule model.
-     * @param int $id ID
+     * Displays a schedule group with all its stops.
+     * @param string $date Date
+     * @param int $car_id Car ID
+     * @param int $route_id Route ID
      * @return string
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException if the schedule group cannot be found
      */
-    public function actionView(int $id): string
+    public function actionView(string $date, int $car_id, int $route_id): string
     {
+        // Находим первую запись расписания для получения основной информации
+        $mainSchedule = Schedule::find()
+            ->where([
+                "date" => $date,
+                "car_id" => $car_id,
+                "route_id" => $route_id,
+            ])
+            ->orderBy(["stop_number" => SORT_ASC])
+            ->one();
+
+        if (!$mainSchedule) {
+            throw new NotFoundHttpException("Расписание не найдено.");
+        }
+
+        // Получаем все записи расписания для этой группы
+        $scheduleDetails = Schedule::find()
+            ->where([
+                "date" => $date,
+                "car_id" => $car_id,
+                "route_id" => $route_id,
+            ])
+            ->orderBy(["stop_number" => SORT_ASC])
+            ->all();
+
         return $this->render("view", [
-            "model" => $this->findModel($id),
+            "model" => $mainSchedule,
+            "scheduleDetails" => $scheduleDetails,
         ]);
     }
 
@@ -242,54 +271,6 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Updates an existing Schedule model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $id ID
-     * @return string|\yii\web\Response
-     */
-    public function actionUpdate(int $id)
-    {
-        $model = $this->findModel($id);
-
-        if ($this->request->isPost) {
-            // Разрешаем редактировать только 3 поля
-            $allowedAttributes = [
-                "planned_time",
-                "actual_time",
-                "boarded_count",
-            ];
-
-            if ($model->load($this->request->post())) {
-                // Сохраняем только разрешенные атрибуты
-                if (
-                    $model->validate($allowedAttributes) &&
-                    $model->save(false, $allowedAttributes)
-                ) {
-                    return $this->redirect(["view", "id" => $model->id]);
-                }
-            }
-        }
-
-        return $this->render("update", [
-            "model" => $model,
-        ]);
-    }
-
-    /**
-     * Deletes an existing Schedule model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $id ID
-     * @return Response
-     * @throws NotFoundHttpException
-     */
-    public function actionDelete(int $id): Response
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(["index"]);
-    }
-
-    /**
      * Finds the Schedule model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param int $id ID
@@ -303,5 +284,106 @@ class ScheduleController extends Controller
         }
 
         throw new NotFoundHttpException("The requested page does not exist.");
+    }
+
+    /**
+     * Updates a schedule group (all stops for a specific route/date/car).
+     * @param string $date Date
+     * @param int $car_id Car ID
+     * @param int $route_id Route ID
+     * @return string|\yii\web\Response
+     * @throws NotFoundHttpException if the schedule group cannot be found
+     */
+    public function actionUpdate(string $date, int $car_id, int $route_id): Response
+    {
+        // Получаем все записи расписания для этой группы
+        $schedules = Schedule::find()
+            ->where([
+                "date" => $date,
+                "car_id" => $car_id,
+                "route_id" => $route_id,
+            ])
+            ->orderBy(["stop_number" => SORT_ASC])
+            ->all();
+
+        if (empty($schedules)) {
+            throw new NotFoundHttpException("Расписание не найдено.");
+        }
+
+        if ($this->request->isPost) {
+            $updated = 0;
+            foreach ($schedules as $schedule) {
+                $postData = $this->request->post();
+                $scheduleKey = "Schedule_{$schedule->id}";
+
+                if (isset($postData[$scheduleKey])) {
+                    $allowedAttributes = [
+                        "planned_time",
+                        "actual_time",
+                        "boarded_count",
+                    ];
+
+                    if (
+                        $schedule->load([
+                            $schedule->formName() => $postData[$scheduleKey],
+                        ])
+                    ) {
+                        if (
+                            $schedule->validate($allowedAttributes) &&
+                            $schedule->save(false, $allowedAttributes)
+                        ) {
+                            $updated++;
+                        }
+                    }
+                }
+            }
+
+            if ($updated > 0) {
+                Yii::$app->session->setFlash(
+                    "success",
+                    "Обновлено {$updated} остановок.",
+                );
+                return $this->redirect([
+                    "view",
+                    "date" => $date,
+                    "car_id" => $car_id,
+                    "route_id" => $route_id,
+                ]);
+            }
+        }
+
+        return $this->render("update-group", [
+            "schedules" => $schedules,
+            "date" => $date,
+            "car_id" => $car_id,
+            "route_id" => $route_id,
+        ]);
+    }
+
+    /**
+     * Deletes a schedule group (all stops for a specific route/date/car).
+     * @param string $date Date
+     * @param int $car_id Car ID
+     * @param int $route_id Route ID
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException if the schedule group cannot be found
+     */
+    public function actionDelete(string $date, int $car_id, int $route_id): Response {
+        $deleted = Schedule::deleteAll([
+            "date" => $date,
+            "car_id" => $car_id,
+            "route_id" => $route_id,
+        ]);
+
+        if ($deleted > 0) {
+            Yii::$app->session->setFlash(
+                "success",
+                "Удалено {$deleted} записей расписания.",
+            );
+        } else {
+            throw new NotFoundHttpException("Расписание не найдено.");
+        }
+
+        return $this->redirect(["index"]);
     }
 }
