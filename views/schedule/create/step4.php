@@ -162,7 +162,7 @@ $carName = isset($availableCars[$model->car_id])
                                         ): ?>
                                             <tr>
                                                 <td class="align-middle">
-                                                    <span class="badge badge-primary"><?= $stopData[
+                                                    <span class="badge-primary"><?= $stopData[
                                                         "stop_number"
                                                     ] ?></span>
                                                 </td>

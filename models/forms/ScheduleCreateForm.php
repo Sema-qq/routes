@@ -288,7 +288,7 @@ class ScheduleCreateForm extends Model
             ->distinct()
             ->column();
 
-        $query = Car::find();
+        $query = Car::find()->availableYear();
         if (!empty($busyCars)) {
             $query->andWhere(["not in", "id", $busyCars]);
         }

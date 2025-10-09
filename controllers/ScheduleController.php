@@ -286,6 +286,39 @@ class ScheduleController extends Controller
         throw new NotFoundHttpException("The requested page does not exist.");
     }
 
+    public function actionUpdateStop(int $id)
+    {
+        $model = $this->findModel($id);
+
+        if ($this->request->isPost) {
+            // Разрешаем редактировать только 3 поля
+            $allowedAttributes = [
+                "planned_time",
+                "actual_time",
+                "boarded_count",
+            ];
+
+            if ($model->load($this->request->post())) {
+                // Сохраняем только разрешенные атрибуты
+                if (
+                    $model->validate($allowedAttributes) &&
+                    $model->save(false, $allowedAttributes)
+                ) {
+                    return $this->redirect([
+                        "view",
+                        "date" => $model->date,
+                        "car_id" => $model->car_id,
+                        "route_id" => $model->route_id,
+                    ]);
+                }
+            }
+        }
+
+        return $this->render("update", [
+            "model" => $model,
+        ]);
+    }
+
     /**
      * Updates a schedule group (all stops for a specific route/date/car).
      * @param string $date Date

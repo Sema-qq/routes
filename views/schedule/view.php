@@ -98,17 +98,6 @@ $completionPercent =
                 </div>
                 <div class="card-body text-center">
                     <div class="row">
-                        <div class="col-12 mb-3">
-                            <h3 class="text-primary"><?= $completedStops ?>/<?= $totalStops ?></h3>
-                            <small class="text-muted">Выполнено остановок</small>
-                            <div class="progress mt-2">
-                                <div class="progress-bar bg-success" style="width: <?= $completionPercent ?>%"></div>
-                            </div>
-                            <small class="text-success"><?= $completionPercent ?>%</small>
-                        </div>
-                    </div>
-
-                    <div class="row">
                         <div class="col-6">
                             <h4 class="text-info mb-0"><?= $totalBoarded ?></h4>
                             <small class="text-muted">Всего вошло</small>
@@ -123,29 +112,16 @@ $completionPercent =
 
             <div class="card mt-3">
                 <div class="card-body text-center">
-                    <p class="mb-3">
-                        <?= Html::a(
-                            '<i class="fas fa-edit"></i> Редактировать остановки',
-                            [
-                                "update-group",
-                                "date" => $model->date,
-                                "car_id" => $model->car_id,
-                                "route_id" => $model->route_id,
-                            ],
-                            ["class" => "btn btn-primary btn-block"],
-                        ) ?>
-                    </p>
-
                     <?= Html::a(
                         '<i class="fas fa-trash"></i> Удалить расписание',
                         [
-                            "delete-group",
+                            "delete",
                             "date" => $model->date,
                             "car_id" => $model->car_id,
                             "route_id" => $model->route_id,
                         ],
                         [
-                            "class" => "btn btn-danger btn-block",
+                            "class" => "btn btn-sm btn-danger btn-block",
                             "data" => [
                                 "confirm" =>
                                     "Вы точно хотите удалить все расписание с " .
@@ -193,10 +169,8 @@ $completionPercent =
                         "label" => "№",
                         "format" => "raw",
                         "value" => function (Schedule $model) {
-                            return "<span class='badge badge-primary'>{$model->stop_number}</span>";
+                            return $model->stop_number;
                         },
-                        "headerOptions" => ["width" => "60"],
-                        "contentOptions" => ["class" => "text-center"],
                     ],
                     [
                         "attribute" => "stop_id",
@@ -219,8 +193,6 @@ $completionPercent =
                             }
                             return '<span class="text-muted">—</span>';
                         },
-                        "headerOptions" => ["width" => "120"],
-                        "contentOptions" => ["class" => "text-center"],
                     ],
                     [
                         "attribute" => "actual_time",
@@ -251,42 +223,14 @@ $completionPercent =
                             }
                             return '<span class="text-muted">—</span>';
                         },
-                        "headerOptions" => ["width" => "130"],
-                        "contentOptions" => ["class" => "text-center"],
                     ],
                     [
                         "attribute" => "boarded_count",
                         "label" => "Вошло пассажиров",
                         "format" => "raw",
                         "value" => function (Schedule $model) {
-                            if ($model->boarded_count > 0) {
-                                return "<span class='badge badge-info'><i class='fas fa-user'></i> {$model->boarded_count}</span>";
-                            }
-                            return '<span class="text-muted">0</span>';
+                            return $model->boarded_count;
                         },
-                        "headerOptions" => ["width" => "130"],
-                        "contentOptions" => ["class" => "text-center"],
-                    ],
-                    [
-                        "label" => "Статус",
-                        "format" => "raw",
-                        "value" => function (Schedule $model) {
-                            if ($model->actual_time) {
-                                if (
-                                    $model->planned_time &&
-                                    $model->actual_time > $model->planned_time
-                                ) {
-                                    return '<span class="badge badge-warning"><i class="fas fa-clock"></i> Опоздание</span>';
-                                } else {
-                                    return '<span class="badge badge-success"><i class="fas fa-check"></i> Выполнено</span>';
-                                }
-                            } elseif ($model->planned_time) {
-                                return '<span class="badge badge-secondary"><i class="fas fa-hourglass-half"></i> Ожидается</span>';
-                            }
-                            return '<span class="badge badge-light">Не запланировано</span>';
-                        },
-                        "headerOptions" => ["width" => "120"],
-                        "contentOptions" => ["class" => "text-center"],
                     ],
                     [
                         "class" => "yii\grid\ActionColumn",
@@ -295,79 +239,18 @@ $completionPercent =
                         "buttons" => [
                             "update" => function ($url, Schedule $model, $key) {
                                 return Html::a(
-                                    '<i class="fas fa-edit"></i>',
-                                    ["update", "id" => $model->id],
+                                    'Редактировать',
+                                    ["update-stop", "id" => $model->id],
                                     [
-                                        "class" =>
-                                            "btn btn-sm btn-outline-primary",
-                                        "title" => "Редактировать остановку",
-                                        "data-toggle" => "tooltip",
+                                        "class" => "btn btn-sm btn-outline-primary",
+                                        'data-pjax' => '0',
                                     ],
                                 );
                             },
                         ],
-                        "headerOptions" => ["width" => "80"],
-                        "contentOptions" => ["class" => "text-center"],
                     ],
                 ],
             ]) ?>
-
-            <div class="alert alert-info mt-3">
-                <i class="fas fa-info-circle"></i>
-                <strong>Легенда:</strong>
-                <ul class="mb-0 mt-2">
-                    <li><span class="badge badge-success"><i class="fas fa-check"></i></span> - остановка выполнена вовремя</li>
-                    <li><span class="badge badge-warning"><i class="fas fa-clock"></i></span> - остановка выполнена с опозданием</li>
-                    <li><span class="badge badge-secondary"><i class="fas fa-hourglass-half"></i></span> - остановка еще не выполнена</li>
-                    <li>Фактическое время отмечается красным, если есть опоздание относительно планируемого времени</li>
-                </ul>
-            </div>
         </div>
     </div>
-
 </div>
-
-<style>
-.progress {
-    height: 8px;
-    background-color: #e9ecef;
-}
-
-.badge {
-    font-size: 0.75em;
-}
-
-.detail-view th {
-    background-color: #f8f9fa;
-    width: 30%;
-}
-
-.card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.table td, .table th {
-    vertical-align: middle;
-}
-
-.btn-block {
-    display: block;
-    width: 100%;
-}
-
-.text-danger .fas {
-    color: #dc3545;
-}
-
-.text-success .fas {
-    color: #28a745;
-}
-</style>
-
-<?php $this->registerJs("
-    // Инициализация тултипов
-    $(document).ready(function() {
-        $('[data-toggle=\"tooltip\"]').tooltip();
-    });
-"); ?>

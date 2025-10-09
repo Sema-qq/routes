@@ -8,13 +8,13 @@ use yii\widgets\ActiveForm;
 /** @var yii\web\View $this */
 /** @var app\models\repository\Schedule $model */
 
-$this->title = "Изменение расписания: " . $model->id;
+$this->title = "Изменение расписания: " . $model->PublicName() . ", остановка №" . $model->stop_number;
 $this->params["breadcrumbs"][] = ["label" => "Расписания", "url" => ["index"]];
 $this->params["breadcrumbs"][] = [
     "label" => $model->id,
     "url" => ["view", "id" => $model->id],
 ];
-$this->params["breadcrumbs"][] = "Изменение";
+$this->params["breadcrumbs"][] = "Редактирование";
 ?>
 <div class="schedule-update">
 

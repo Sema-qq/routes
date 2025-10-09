@@ -130,24 +130,6 @@ $this->params["breadcrumbs"][] = $this->title;
                 },
             ],
             [
-                "label" => "Остановки",
-                "format" => "raw",
-                "value" => function (ScheduleGroup $model) {
-                    $percent = $model->getCompletionPercent();
-                    $statusClass = $model->getStatusClass();
-
-                    return "
-                        <div class='text-center'>
-                            <span class='badge {$statusClass}'>{$model->completed_stops}/{$model->stops_count}</span>
-                            <div class='progress mt-1' style='height: 6px;'>
-                                <div class='progress-bar bg-success' style='width: {$percent}%'></div>
-                            </div>
-                            <small class='text-muted'>{$percent}%</small>
-                        </div>
-                    ";
-                },
-            ],
-            [
                 "label" => "Пассажиры",
                 "format" => "raw",
                 "value" => function (ScheduleGroup $model) {
