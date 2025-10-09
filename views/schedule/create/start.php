@@ -68,7 +68,6 @@ $this->params["breadcrumbs"][] = $this->title;
                     <?= $form->field($model, "date")->input("date", [
                         "class" => "form-control",
                         "required" => true,
-                        "min" => date("Y-m-d"),
                     ]) ?>
 
                     <div class="form-group row">

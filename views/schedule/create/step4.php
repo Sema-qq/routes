@@ -469,8 +469,6 @@ $carName = isset($availableCars[$model->car_id])
             }
         });
 
-        $('#finish-btn').prop('disabled', !allValid || !allFilled);
-
         return allValid && allFilled;
     }
 
