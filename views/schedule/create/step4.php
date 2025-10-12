@@ -94,6 +94,12 @@ $carName = isset($availableCars[$model->car_id])
                         "options" => ["class" => "form-horizontal"],
                     ]); ?>
 
+                    <?php if ($model->hasErrors()): ?>
+                        <div class="alert alert-danger">
+                            <?= $form->errorSummary($model); ?>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Сводная информация -->
                     <div class="card mb-4 border-info">
                         <div class="card-body">

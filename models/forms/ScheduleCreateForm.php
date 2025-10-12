@@ -256,7 +256,7 @@ class ScheduleCreateForm extends Model
         }
 
         $routes = Route::find()
-            ->withoutSchedules()
+//            ->withoutSchedules()
             ->byCode($this->route_code)
             ->all();
 
