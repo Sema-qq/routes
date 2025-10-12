@@ -57,8 +57,7 @@ $this->title = "Расписание маршруток";
     echo Nav::widget([
         "options" => ["class" => "navbar-nav"],
         "items" => [
-            ["label" => "About", "url" => ["/site/about"]],
-            ["label" => "Contact", "url" => ["/site/contact"]],
+            ["label" => "Об авторе", "url" => ["/site/about"]],
             ["label" => "Пользователи", "url" => ["/user/index"]],
             ["label" => "Маршрутки", "url" => ["/car/index"]],
             ["label" => "Производители", "url" => ["/car-brand/index"]],

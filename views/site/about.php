@@ -4,15 +4,13 @@
 
 use yii\helpers\Html;
 
-$this->title = 'About';
+$this->title = 'Об авторе';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="site-about">
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        This is the About page. You may modify the following file to customize its content:
+        Семенов Кирилл Вячеславович, 1991 г.р., бекенд разработчик.
     </p>
-
-    <code><?= __FILE__ ?></code>
 </div>

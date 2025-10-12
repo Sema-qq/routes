@@ -7,45 +7,41 @@ $this->title = 'My Yii Application';
 <div class="site-index">
 
     <div class="jumbotron text-center bg-transparent mt-5 mb-5">
-        <h1 class="display-4">Congratulations!</h1>
+        <h1 class="display-4">Расписание маршруток</h1>
 
-        <p class="lead">You have successfully created your Yii-powered application.</p>
+        <p class="lead">Учебный проект. Вариант задания №9.</p>
 
-        <p><a class="btn btn-lg btn-success" href="https://www.yiiframework.com">Get started with Yii</a></p>
+        <p><a class="btn btn-lg btn-success" href="/report/index">Перейти к отчетам</a></p>
     </div>
 
     <div class="body-content">
 
         <div class="row">
             <div class="col-lg-4 mb-3">
-                <h2>Heading</h2>
+                <h2>Маршрутки</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                <p>Транспортные средства для перевозки пассажиров.
+                    В рамках проекта имеют владельца и водителя.
+                    Могут быть назначены на разные маршруты. Не могут иметь более одного владельца.</p>
 
-                <p><a class="btn btn-outline-secondary" href="https://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
+                <p><a class="btn btn-outline-secondary" href="/car/index">Маршрутки</a></p>
             </div>
             <div class="col-lg-4 mb-3">
-                <h2>Heading</h2>
+                <h2>Маршруты</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                <p>Маршрут следования состоит из 10 остановок. Может быть прямой и обратный.
+                    На маршруте должен быть водитель с опытом более трёх лет и автомобилем не старше 10 лет.</p>
 
-                <p><a class="btn btn-outline-secondary" href="https://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
+                <p><a class="btn btn-outline-secondary" href="/route/index">Маршруты</a></p>
             </div>
             <div class="col-lg-4">
-                <h2>Heading</h2>
+                <h2>Расписания</h2>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                <p>Расписания маршрутов содержат информацию маршруте,
+                    водителе, автомобиле, запланированном и фактическом времени остановки,
+                    а так же о количестве вошедших пассажиров.</p>
 
-                <p><a class="btn btn-outline-secondary" href="https://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
+                <p><a class="btn btn-outline-secondary" href="/schedule/index">Расписания</a></p>
             </div>
         </div>
 
