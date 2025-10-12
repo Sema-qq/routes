@@ -141,6 +141,7 @@ $this->params["breadcrumbs"][] = $this->title;
             ],
             [
                 'class' => ActionColumn::className(),
+                'template' => '{view} {delete}', // update исключён
                 'urlCreator' => function ($action, ScheduleGroup $model, $key, $index, $column) {
                     return Url::toRoute([
                         $action,

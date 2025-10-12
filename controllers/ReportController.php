@@ -120,48 +120,59 @@ class ReportController extends Controller
      */
     public function actionDailyRevenue()
     {
-        $startDate = Yii::$app->request->get("start_date", date("Y-m-01"));
-        $endDate = Yii::$app->request->get("end_date", date("Y-m-d"));
+        $year = (int) date('Y');
+        $defaultStart = sprintf('%d-01-01', $year);
+        $defaultEnd   = date('Y-m-d');
 
-        $query = (new Query())
+        $startDate = Yii::$app->request->get('start_date', $defaultStart);
+        $endDate   = Yii::$app->request->get('end_date', $defaultEnd);
+
+        if ($endDate < $startDate) {
+            $endDate = $startDate;
+        }
+
+        // 1) Сутки по (route_id, date): суммируем выручку всех машин на маршруте за день
+        $dailyByRoute = (new \yii\db\Query())
             ->select([
-                "c.id as car_id",
-                "c.model",
-                "cb.name as brand_name",
-                "r.id as route_id",
-                "r.type",
-                "AVG(daily_revenue.revenue) as avg_daily_revenue",
+                's.route_id',
+                's.date',
+                new \yii\db\Expression('SUM(s.boarded_count * c.fare) AS revenue'),
             ])
-            ->from([
-                "daily_revenue" => (new Query())
-                    ->select([
-                        "s.car_id",
-                        "s.route_id",
-                        "s.date",
-                        "SUM(s.boarded_count * c.fare) as revenue",
-                    ])
-                    ->from("schedules s")
-                    ->leftJoin("cars c", "s.car_id = c.id")
-                    ->where(["between", "s.date", $startDate, $endDate])
-                    ->groupBy(["s.car_id", "s.route_id", "s.date"]),
-            ])
-            ->leftJoin("cars c", "daily_revenue.car_id = c.id")
-            ->leftJoin("car_brands cb", "c.brand_id = cb.id")
-            ->leftJoin("routes r", "daily_revenue.route_id = r.id")
-            ->groupBy(["c.id", "c.model", "cb.name", "r.id", "r.type"])
-            ->orderBy(["avg_daily_revenue" => SORT_DESC]);
+            ->from(['s' => 'schedules'])
+            ->innerJoin(['c' => 'cars'], 'c.id = s.car_id')
+            ->where(['between', 's.date', $startDate, $endDate])
+            ->groupBy(['s.route_id', 's.date']);
 
-        $dataProvider = new ActiveDataProvider([
-            "query" => $query,
-            "pagination" => [
-                "pageSize" => 20,
-            ],
+        $dailyByCode = (new \yii\db\Query())
+            ->select([
+                'r.code',
+                'd.date',
+                new \yii\db\Expression('SUM(d.revenue) AS revenue'),
+            ])
+            ->from(['d' => $dailyByRoute])
+            ->innerJoin(['r' => 'routes'], 'r.id = d.route_id')
+            ->groupBy(['r.code', 'd.date']);
+
+        $query = (new \yii\db\Query())
+            ->select([
+                'code',
+                new \yii\db\Expression('AVG(revenue) AS avg_daily_revenue'),
+                new \yii\db\Expression('SUM(revenue) AS total_revenue'),
+                new \yii\db\Expression('COUNT(*)     AS days_count'),
+            ])
+            ->from(['x' => $dailyByCode])
+            ->groupBy(['code'])
+            ->orderBy(['avg_daily_revenue' => SORT_DESC]);
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            'pagination' => ['pageSize' => 20],
         ]);
 
-        return $this->render("daily-revenue", [
-            "dataProvider" => $dataProvider,
-            "startDate" => $startDate,
-            "endDate" => $endDate,
+        return $this->render('daily-revenue', [
+            'dataProvider' => $dataProvider,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
         ]);
     }
 
@@ -171,56 +182,46 @@ class ReportController extends Controller
      */
     public function actionLatestDriver()
     {
-        $routeId = Yii::$app->request->get("route_id");
-        $routes = Route::find()->with("car")->all();
+        $routeId = Yii::$app->request->get('route_id');
+
+        // просто список маршрутов для селекта
+        $routes = Route::find()->orderBy(['code' => SORT_ASC, 'type' => SORT_ASC])->all();
 
         $result = null;
 
         if ($routeId) {
-            $query = (new Query())
+            $row = (new \yii\db\Query())
                 ->select([
-                    "u.id",
-                    "u.first_name",
-                    "u.last_name",
-                    "u.middle_name",
-                    "SUM(TIME_TO_SEC(s.actual_time) - TIME_TO_SEC(s.planned_time)) as total_delay_seconds",
+                    'u.id',
+                    'u.full_name',
+                    // суммируем только положительные опоздания в секундах
+                    'total_delay_seconds' => new \yii\db\Expression(
+                        "SUM(GREATEST(EXTRACT(EPOCH FROM s.actual_time) - EXTRACT(EPOCH FROM s.planned_time), 0))"
+                    ),
                 ])
-                ->from("schedules s")
-                ->leftJoin("cars c", "s.car_id = c.id")
-                ->leftJoin("users u", "c.driver_id = u.id")
-                ->where([
-                    "s.route_id" => $routeId,
-                    "and",
-                    ["not", ["s.actual_time" => null]],
-                    ["not", ["s.planned_time" => null]],
-                    "TIME_TO_SEC(s.actual_time) > TIME_TO_SEC(s.planned_time)",
-                ])
-                ->groupBy([
-                    "u.id",
-                    "u.first_name",
-                    "u.last_name",
-                    "u.middle_name",
-                ])
-                ->orderBy(["total_delay_seconds" => SORT_DESC])
+                ->from(['s' => 'schedules'])
+                ->innerJoin(['c' => 'cars'], 's.car_id = c.id')
+                ->innerJoin(['u' => 'users'], 'c.driver_id = u.id')
+                ->where(['s.route_id' => $routeId])
+                ->andWhere('s.actual_time IS NOT NULL AND s.planned_time IS NOT NULL')
+                ->groupBy(['u.id', 'u.full_name'])
+                ->orderBy(['total_delay_seconds' => SORT_DESC])
                 ->limit(1)
                 ->one();
 
-            if ($query) {
+            if ($row) {
                 $result = [
-                    "driver" => User::findOne($query["id"]),
-                    "total_delay_seconds" => $query["total_delay_seconds"],
-                    "total_delay_minutes" => round(
-                        $query["total_delay_seconds"] / 60,
-                        2,
-                    ),
+                    'driver' => \app\models\repository\User::findOne($row['id']),
+                    'total_delay_seconds' => (int) $row['total_delay_seconds'],
+                    'total_delay_minutes' => round(((int) $row['total_delay_seconds']) / 60, 2),
                 ];
             }
         }
 
-        return $this->render("latest-driver", [
-            "routes" => $routes,
-            "selectedRouteId" => $routeId,
-            "result" => $result,
+        return $this->render('latest-driver', [
+            'routes' => $routes,
+            'selectedRouteId' => $routeId,
+            'result' => $result,
         ]);
     }
 }
